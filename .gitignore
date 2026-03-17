@@ -29,6 +29,6 @@ venv/
 
 # Demo generated files
 demos/subagent-needle/haystack/
-demos/subagent-needle/__pycache__/
-demos/hook-guardrail/src/__pycache__/
-demos/hook-guardrail/src/.pytest_cache/
+demos/loop-monitor/training.log
+**/__pycache__/
+**/.pytest_cache/
