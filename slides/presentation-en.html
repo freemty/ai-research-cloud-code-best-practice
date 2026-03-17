@@ -1,0 +1,2015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Research Cloud Code Best Practice (EN)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+/* ===========================================
+   THEME: Terminal Green
+   =========================================== */
+:root {
+    --bg-primary: #0a0f0a;
+    --bg-secondary: #0d140d;
+    --bg-card: rgba(0, 255, 65, 0.04);
+    --border-green: rgba(0, 255, 65, 0.25);
+    --text-primary: #00ff41;
+    --text-secondary: #66cc66;
+    --text-dim: #3a6b3a;
+    --text-body: #b8e6b8;
+    --accent: #00cccc;
+    --accent-glow: rgba(0, 204, 204, 0.3);
+    --highlight: #00ff41;
+    --highlight-glow: rgba(0, 255, 65, 0.15);
+
+    --font-display: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+
+    --title-size: clamp(1.8rem, 5vw, 3.5rem);
+    --h2-size: clamp(1.4rem, 3.5vw, 2.4rem);
+    --h3-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    --body-size: clamp(0.75rem, 1.4vw, 1.05rem);
+    --small-size: clamp(0.65rem, 1vw, 0.85rem);
+    --label-size: clamp(0.6rem, 0.9vw, 0.75rem);
+
+    --slide-padding: clamp(1.5rem, 4vw, 4rem);
+    --content-gap: clamp(0.8rem, 2vw, 1.8rem);
+    --element-gap: clamp(0.3rem, 1vw, 0.8rem);
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --duration: 0.6s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-body);
+    height: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+}
+
+/* Scanline overlay */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* ===========================================
+   SLIDE BASE
+   =========================================== */
+.slide {
+    width: 100vw;
+    min-width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: var(--slide-padding);
+}
+
+.slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-height: 100%;
+    max-width: min(90vw, 1100px);
+    width: 100%;
+    overflow: hidden;
+    gap: var(--content-gap);
+}
+
+/* ===========================================
+   TYPOGRAPHY
+   =========================================== */
+h1 {
+    font-family: var(--font-display);
+    font-size: var(--title-size);
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 0 20px var(--highlight-glow);
+}
+
+h2 {
+    font-family: var(--font-display);
+    font-size: var(--h2-size);
+    color: var(--text-primary);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+h3 {
+    font-family: var(--font-display);
+    font-size: var(--h3-size);
+    color: var(--text-secondary);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+p, li {
+    font-size: var(--body-size);
+    line-height: 1.6;
+    color: var(--text-body);
+}
+
+.accent { color: var(--accent); }
+.highlight { color: var(--highlight); text-shadow: 0 0 8px var(--highlight-glow); }
+.dim { color: var(--text-dim); }
+.mono { font-family: var(--font-display); }
+
+.subtitle {
+    font-family: var(--font-display);
+    font-size: var(--h3-size);
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.big-quote {
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 2.5vw, 1.8rem);
+    color: var(--text-primary);
+    border-left: 3px solid var(--accent);
+    padding-left: clamp(0.8rem, 2vw, 1.5rem);
+    line-height: 1.5;
+}
+
+/* ===========================================
+   CURSOR BLINK
+   =========================================== */
+.cursor::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
+    color: var(--text-primary);
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ===========================================
+   CARDS & GRIDS
+   =========================================== */
+.terminal-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-green);
+    border-radius: 4px;
+    padding: clamp(0.6rem, 1.5vw, 1.2rem);
+    font-family: var(--font-display);
+    font-size: var(--small-size);
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+}
+
+.feature-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-green);
+    border-radius: 4px;
+    padding: clamp(0.6rem, 1.5vw, 1rem);
+}
+
+.feature-card h3 {
+    font-size: var(--small-size);
+    color: var(--accent);
+    margin-bottom: var(--element-gap);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.feature-card p {
+    font-size: var(--small-size);
+    color: var(--text-body);
+}
+
+/* ===========================================
+   TABLES
+   =========================================== */
+.terminal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--small-size);
+}
+
+.terminal-table th, .terminal-table td {
+    border: 1px solid var(--border-green);
+    padding: clamp(0.3rem, 0.8vw, 0.6rem) clamp(0.4rem, 1vw, 0.8rem);
+    text-align: left;
+}
+
+.terminal-table th {
+    background: rgba(0, 255, 65, 0.08);
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--label-size);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.terminal-table td {
+    color: var(--text-body);
+}
+
+/* ===========================================
+   LISTS
+   =========================================== */
+.bullet-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--element-gap);
+}
+
+.bullet-list li {
+    padding-left: 1.2em;
+    position: relative;
+    font-size: var(--body-size);
+}
+
+.bullet-list li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: var(--text-primary);
+    font-family: var(--font-display);
+    font-weight: 700;
+}
+
+/* ===========================================
+   SECTION TITLE SLIDES
+   =========================================== */
+.section-title-slide {
+    background: radial-gradient(ellipse at center, rgba(0, 255, 65, 0.05) 0%, transparent 70%);
+}
+
+.section-title-slide h1 {
+    font-size: clamp(2rem, 6vw, 4.5rem);
+}
+
+.section-number {
+    font-family: var(--font-display);
+    font-size: var(--label-size);
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: var(--element-gap);
+}
+
+/* ===========================================
+   COMPARISON (Before/After, Left/Right)
+   =========================================== */
+.comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(0.5rem, 1.5vw, 1.2rem);
+}
+
+@media (max-width: 600px) {
+    .comparison-grid { grid-template-columns: 1fr; }
+}
+
+.comparison-col {
+    background: var(--bg-card);
+    border: 1px solid var(--border-green);
+    border-radius: 4px;
+    padding: clamp(0.5rem, 1.2vw, 1rem);
+}
+
+.comparison-col.bad { border-color: rgba(255, 80, 80, 0.3); }
+.comparison-col.good { border-color: rgba(0, 204, 204, 0.4); }
+
+.comparison-col h3 {
+    font-size: var(--small-size);
+    margin-bottom: var(--element-gap);
+}
+
+.comparison-col.bad h3 { color: #ff5050; }
+.comparison-col.good h3 { color: var(--accent); }
+
+/* ===========================================
+   DIAGRAM (monospace boxes)
+   =========================================== */
+.diagram {
+    font-family: var(--font-display);
+    font-size: clamp(0.55rem, 1vw, 0.8rem);
+    color: var(--text-secondary);
+    white-space: pre;
+    line-height: 1.4;
+    overflow: hidden;
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity var(--duration) var(--ease-out-expo),
+                transform var(--duration) var(--ease-out-expo);
+}
+
+.slide.visible .reveal {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal:nth-child(4) { transition-delay: 0.25s; }
+.reveal:nth-child(5) { transition-delay: 0.3s; }
+.reveal:nth-child(6) { transition-delay: 0.35s; }
+
+/* ===========================================
+   PROGRESS BAR & NAV
+   =========================================== */
+.progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--text-primary);
+    box-shadow: 0 0 8px var(--highlight-glow);
+    z-index: 1000;
+    transition: width 0.3s ease;
+}
+
+.nav-dots {
+    position: fixed;
+    bottom: clamp(0.5rem, 1.5vh, 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    z-index: 1000;
+}
+
+.nav-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    padding: 0;
+}
+
+.nav-dot.active {
+    background: var(--text-primary);
+    box-shadow: 0 0 6px var(--highlight-glow);
+    transform: scale(1.4);
+}
+
+/* ===========================================
+   RESPONSIVE
+   =========================================== */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(1rem, 3vw, 2.5rem);
+        --content-gap: clamp(0.5rem, 1.5vw, 1.2rem);
+        --title-size: clamp(1.4rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1.1rem, 3vw, 1.8rem);
+    }
+}
+
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.8rem, 2.5vw, 1.8rem);
+        --content-gap: clamp(0.4rem, 1vw, 0.8rem);
+        --title-size: clamp(1.2rem, 4vw, 2rem);
+        --body-size: clamp(0.65rem, 1.2vw, 0.9rem);
+    }
+    .nav-dots { display: none; }
+}
+
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2vw, 1.2rem);
+        --title-size: clamp(1rem, 3.5vw, 1.6rem);
+        --body-size: clamp(0.6rem, 1vw, 0.8rem);
+    }
+}
+
+@media (max-width: 768px) {
+    :root { --title-size: clamp(1.5rem, 7vw, 2.5rem); }
+    .feature-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+    html { scroll-behavior: auto; }
+    body { scroll-behavior: auto; }
+}
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+    <nav class="nav-dots" id="navDots"></nav>
+    <div class="slide-counter mono dim" id="slideCounter" style="position:fixed;bottom:clamp(0.5rem,1.5vh,1rem);right:clamp(0.8rem,2vw,1.5rem);font-size:clamp(0.6rem,0.8vw,0.75rem);z-index:1000;opacity:0.5;">1 / 38</div>
+
+    <!-- ========== OPENING (Slides 1-3) ========== -->
+    <!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+    <!-- ========== OPENING ========== -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<!-- ============================================================
+     Opening — Slides 1-3
+     ============================================================ -->
+
+<!-- Slide 1: Title -->
+<section class="slide section-title-slide" id="slide-1">
+  <div class="slide-content">
+    <div class="reveal" style="text-align:center; padding-top: 4rem;">
+      <h1 class="reveal" style="font-size: 2.6rem; line-height: 1.2; margin-bottom: 1.2rem;">
+        AI Research Cloud Code<br>
+        <span class="accent">Best Practice</span>
+      </h1>
+      <p class="subtitle reveal" style="font-size: 1.35rem; margin-bottom: 3rem;">
+        From Assistant to Agent &mdash; A Paradigm Shift for AI Researchers
+      </p>
+      <div class="reveal dim" style="font-size: 0.95rem; letter-spacing: 0.08em; margin-top: 4rem; border-top: 1px solid rgba(0,255,102,0.2); padding-top: 1.2rem;">
+        <span class="mono accent">sum_young</span>
+        &nbsp;&bull;&nbsp;
+        <span class="mono">2026-03-16</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 2: The Question -->
+<section class="slide" id="slide-2">
+  <div class="slide-content">
+    <div class="big-quote reveal">
+      "If the model is the same, why would the Harness make a difference?"
+    </div>
+
+    <div class="comparison-grid reveal" style="margin-top: 2.5rem;">
+      <div class="comparison-col terminal-box" style="text-align:center; padding: 2rem 1.5rem;">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#9998;</div>
+        <div class="accent" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem;">
+          Cursor / IDE Embedded Assistant
+        </div>
+        <div class="dim" style="font-size: 0.9rem; line-height: 1.6;">
+          Q&amp;A-style interaction<br>
+          User-driven<br>
+          One-shot output
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; justify-content:center; font-size: 2rem; color: rgba(0,255,102,0.5);">
+        &#x2260;
+      </div>
+
+      <div class="comparison-col terminal-box" style="text-align:center; padding: 2rem 1.5rem; border-color: rgba(0,255,102,0.5);">
+        <div style="font-size: 1.5rem; margin-bottom: 0.75rem;">&#x25B6;</div>
+        <div class="accent" style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.6rem;">
+          Claude Code / Terminal Agent
+        </div>
+        <div class="dim" style="font-size: 0.9rem; line-height: 1.6;">
+          Autonomous loop execution<br>
+          Tool calls + self-verification<br>
+          Continuous iteration until complete
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="text-align:center; margin-top: 2rem; font-size: 0.9rem;">
+      <span class="dim">Both use the</span>
+      <span class="highlight mono"> same model </span>
+      <span class="dim">, yet the results are dramatically different</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: The Answer -->
+<section class="slide" id="slide-3">
+  <div class="slide-content">
+    <h2 class="reveal" style="text-align:center; margin-bottom: 2.5rem;">
+      This is not a tool swap — it's a <span class="accent">paradigm shift</span>
+    </h2>
+
+    <div class="reveal" style="display:flex; align-items:center; justify-content:center; gap: 1.5rem; flex-wrap: wrap;">
+
+      <!-- Assistant Paradigm -->
+      <div class="terminal-box" style="flex:1; min-width:200px; max-width:260px; padding: 1.5rem; text-align:center;">
+        <div class="dim" style="font-size:0.75rem; letter-spacing:0.12em; margin-bottom:0.75rem; text-transform:uppercase;">
+          Assistant Paradigm
+        </div>
+        <div class="mono" style="font-size:1rem; margin-bottom:1rem;">Single-turn Q&amp;A</div>
+        <div style="font-size:0.85rem; line-height:1.7; color:rgba(0,255,102,0.6);">
+          User asks<br>
+          &#x2193;<br>
+          Model answers<br>
+          &#x2193;<br>
+          <span class="dim">Waits for next input</span>
+        </div>
+        <div class="dim" style="margin-top:1rem; font-size:0.8rem;">User-driven</div>
+      </div>
+
+      <!-- Arrow -->
+      <div class="reveal" style="font-size:2.5rem; color: rgba(0,255,102,0.7); flex-shrink:0;">
+        &#x27A1;
+      </div>
+
+      <!-- ReAct Agent Paradigm -->
+      <div class="terminal-box" style="flex:1; min-width:200px; max-width:280px; padding: 1.5rem; text-align:center; border-color: rgba(0,255,102,0.6); box-shadow: 0 0 18px rgba(0,255,102,0.12);">
+        <div class="accent" style="font-size:0.75rem; letter-spacing:0.12em; margin-bottom:0.75rem; text-transform:uppercase;">
+          ReAct Agent Paradigm
+        </div>
+        <div class="mono" style="font-size:1rem; margin-bottom:1rem;">Autonomous Loop</div>
+        <div style="font-size:0.85rem; line-height:1.7; color:rgba(0,255,102,0.85);">
+          Gather context<br>
+          &#x2193;<br>
+          Tool calls<br>
+          &#x2193;<br>
+          Verify results<br>
+          &#x21BA; <span style="font-size:0.75rem;">loop until complete</span>
+        </div>
+        <div class="accent" style="margin-top:1rem; font-size:0.8rem;">Self-driven</div>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="text-align:center; margin-top: 2.5rem; font-size: 1.2rem; font-weight:600;">
+      "You haven't just switched tools — you've switched how you work"<span class="cursor">&#x258C;</span>
+    </div>
+  </div>
+</section>
+
+
+<!-- Slide 4: Part 1 Section Title -->
+<section class="slide section-title-slide">
+  <div class="slide-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:1.5rem;">
+    <div class="section-number mono dim">Part 1</div>
+    <h1 style="font-size:3.2rem;font-weight:700;line-height:1.2;">
+      Core Design &amp; Paradigm
+    </h1>
+    <p class="dim" style="font-size:1.4rem;letter-spacing:0.05em;">
+      Understanding What Makes an <span class="accent">Agent</span> Different
+    </p>
+    <div class="mono dim" style="margin-top:2rem;font-size:0.9rem;letter-spacing:0.15em;">
+      <span class="cursor">█</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Assistant vs Agent Comparison Table -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Traditional Assistant <span class="dim">vs</span> <span class="accent">Claude Code (Agent)</span></h2>
+    <div class="terminal-box" style="margin-top:1.5rem;padding:0;">
+      <table class="terminal-table" style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th class="mono" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;color:#666;font-size:0.85rem;letter-spacing:0.1em;">Dimension</th>
+            <th class="mono" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;color:#888;font-size:0.85rem;letter-spacing:0.1em;">Traditional Chat Assistant</th>
+            <th class="mono accent" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;font-size:0.85rem;letter-spacing:0.1em;">Claude Code (Agent)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">Work Mode</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">Answers questions, then waits</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">Works autonomously, executes continuously</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">Capability</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">Text replies only</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">Takes actions: edit, search, run, deploy</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">Context</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">Sees only the current single file</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">Cross-project, cross-file global understanding</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">Usage</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">You write code, AI reviews it</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">You describe the goal, AI plans and implements</td>
+          </tr>
+          <tr>
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">Feedback Loop</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">Relies on user judgment</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">Self-verifying: runs tests, compares output</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mono dim" style="margin-top:1.2rem;font-size:0.85rem;text-align:right;">
+      Core principle: <span class="highlight">"Delegate, don't dictate"</span>
+    </p>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>
+
+<!-- Slide 6: Agentic Loop (ReAct) -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Agentic Loop <span class="dim">(ReAct Paradigm)</span></h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;align-items:start;">
+      <div class="terminal-box diagram">
+        <div class="mono" style="font-size:0.95rem;line-height:1.9;color:#ccc;">
+          <div style="color:#666;margin-bottom:0.5rem;">┌─────────────────────────┐</div>
+          <div>│  <span class="accent" style="font-weight:700;">1. Gather Context</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  Search files, understand structure&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div>│  <span class="highlight" style="font-weight:700;">2. Take Action</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  Edit files, run commands&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div>│  <span style="color:#88aaff;font-weight:700;">3. Verify Results</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  Run tests, confirm correctness&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;<span class="accent">↩ loop back</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">└─────────────────────────┘</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem;justify-content:center;">
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono accent" style="font-size:0.85rem;margin-bottom:0.4rem;">KEY INSIGHT</p>
+          <p style="font-size:1.1rem;line-height:1.5;">
+            <span class="highlight">Non-linear</span> — iterative self-correction
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.6rem;">Each tool call result</p>
+          <p style="font-size:0.95rem;color:#ccc;line-height:1.5;">feeds back into the loop,<br>guiding the next decision</p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.6rem;">User always stays in the loop</p>
+          <p style="font-size:0.95rem;color:#ccc;line-height:1.5;">Can interrupt and redirect at any time</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/how-claude-code-works</p>
+</section>
+
+<!-- Slide 7: Why ReAct for Research -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Why ReAct Matters for <span class="accent">AI Research</span></h2>
+    <ul class="bullet-list" style="margin-top:1.8rem;display:flex;flex-direction:column;gap:1.2rem;">
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">Multi-step Experiment Automation</span>
+          <span class="mono dim" style="font-size:0.9rem;margin-left:0.8rem;">data → run → analyze → iterate</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">Each step result automatically triggers the next — no manual handoff required</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">Autonomous Codebase Exploration</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">Understands unfamiliar paper implementations, auto-traces call chains and dependencies</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">Self-directed Debugging</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">Find bug → form hypothesis → verify → fix → confirm — closed loop end-to-end</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">Core Principle</span>
+          <div class="terminal-box" style="display:inline-block;padding:0.4rem 1rem;margin-top:0.4rem;">
+            <span class="mono accent" style="font-size:1rem;letter-spacing:0.05em;">"Delegate, don't dictate"</span>
+          </div>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.4rem;">Provide the goal and context, let Claude decide the execution steps</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 8: System Architecture -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>System Architecture</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;">
+      <!-- Two Pillars -->
+      <div>
+        <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.12em;margin-bottom:0.8rem;">TWO PILLARS</p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;">
+          <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+            <p class="accent mono" style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Models</p>
+            <p style="color:#aaa;font-size:0.9rem;">Reasoning &amp; understanding</p>
+            <p class="mono dim" style="font-size:0.8rem;margin-top:0.4rem;">reasoning · code understanding · planning</p>
+          </div>
+          <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+            <p class="highlight mono" style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Tools</p>
+            <p style="color:#aaa;font-size:0.9rem;">Action execution</p>
+            <p class="mono dim" style="font-size:0.8rem;margin-top:0.4rem;">28+ built-in · MCP · Skills · Hooks</p>
+          </div>
+        </div>
+      </div>
+      <!-- Three Environments -->
+      <div>
+        <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.12em;margin-bottom:0.8rem;">THREE ENVIRONMENTS</p>
+        <div class="feature-grid" style="display:flex;flex-direction:column;gap:0.8rem;">
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">Local <span class="dim">(Local)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">Runs on your machine, full file &amp; tool access</p>
+          </div>
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">Cloud <span class="dim">(Cloud)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">Anthropic-hosted VM, task offloading &amp; remote work</p>
+          </div>
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">Remote Control <span class="dim">(Remote Control)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">Browser Web UI + local execution, flexible hybrid</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="terminal-box" style="margin-top:1.2rem;padding:0.7rem 1.2rem;text-align:center;">
+      <span class="mono dim" style="font-size:0.85rem;">Claude Code = </span>
+      <span class="mono highlight" style="font-size:0.9rem;">Agentic Harness</span>
+      <span class="mono dim" style="font-size:0.85rem;"> built around Claude LLM</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/overview</p>
+</section>
+
+<!-- Slide 9: Tool System -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Tool System <span class="dim">—</span> <span class="accent">28+</span> Built-in Tools</h2>
+    <div class="feature-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.8rem;margin-top:1.4rem;">
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">File Operations</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Read</div>
+          <div class="highlight">Edit</div>
+          <div class="highlight">Write</div>
+          <div style="color:#666;">NotebookEdit</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">Search</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Glob</div>
+          <div class="highlight">Grep</div>
+          <div style="color:#666;">pattern match</div>
+          <div style="color:#666;">regex search</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">Execution</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Bash</div>
+          <div style="color:#666;">shell commands</div>
+          <div style="color:#666;">tests · git</div>
+          <div style="color:#666;">scripts</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">Web</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">WebFetch</div>
+          <div style="color:#666;">WebSearch</div>
+          <div style="color:#666;">fetch docs</div>
+          <div style="color:#666;">web search</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">Code Intelligence</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">LSP</div>
+          <div style="color:#666;">type errors</div>
+          <div style="color:#666;">goto def</div>
+          <div style="color:#666;">find refs</div>
+        </div>
+      </div>
+    </div>
+    <div class="terminal-box" style="margin-top:1rem;padding:0.8rem 1.2rem;">
+      <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.1em;margin-bottom:0.5rem;">ORCHESTRATION TOOLS</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">Agent</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">Skill</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskCreate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskList</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskUpdate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">CronCreate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">AskUserQuestion</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">EnterPlanMode</span>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/features-overview</p>
+</section>
+
+<!-- Slide 10: Extension Mechanisms -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Four Extension Mechanisms</h2>
+    <div class="feature-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;margin-top:1.8rem;">
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Skills</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">on-demand</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">Domain knowledge loaded on demand</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">Markdown files → reusable workflows &amp; institutional knowledge</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">MCP</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">protocol</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">Connect to external services</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">Model Context Protocol → Notion, Jira, Slack, DB...</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Hooks</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">automation</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">Automated scripts before/after tool execution</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">PreToolUse · PostToolUse · Stop · PreCompact</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Subagents</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">parallel</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">Specialized agents with independent context</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">Independent context window · system prompt · tools</p>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills, /hooks, /sub-agents, /mcp</p>
+</section>
+
+<!-- Slide 11: Context Window -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Context Window <span class="dim">—</span> Your Most Critical Resource</h2>
+    <div class="big-quote terminal-box" style="margin:1.5rem 0;padding:1.5rem 2rem;text-align:center;border-color:#444;">
+      <p style="font-size:1.5rem;line-height:1.4;color:#eee;">
+        "Your most important resource is <span class="accent">context</span>,<br>not <span class="dim">compute</span>"
+      </p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+      <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+        <p class="mono accent" style="font-size:0.85rem;letter-spacing:0.1em;margin-bottom:0.8rem;">CONTEXT CONTAINS</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> Conversation history
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> File contents
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> Command output
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> <span class="highlight">CLAUDE.md</span> instructions
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> Loaded <span class="highlight">Skills</span>
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> System Prompt
+          </li>
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1rem 1.2rem;flex:1;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.4rem;">WHY IT MATTERS</p>
+          <p style="color:#aaa;font-size:0.9rem;line-height:1.5;">Exhausted context = task loses memory<br>Actively managing context = sustained working capacity</p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;flex:1;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.4rem;">PERSISTENT MEMORY</p>
+          <p style="color:#aaa;font-size:0.9rem;line-height:1.5;"><span class="highlight">CLAUDE.md</span> auto-loaded every session<br><span class="highlight">Auto Memory</span> Claude automatically saves notes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/memory</p>
+</section>
+
+<!-- Slide 12: Context Management Strategies -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Context Management — <span class="accent">Three-Level</span> Strategy</h2>
+    <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;">
+      <!-- Level 1 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #4a9;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#4a9;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 1&nbsp;&nbsp;Fundamentals</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/clear</span>
+          <span class="mono dim" style="font-size:0.85rem;">Full reset when switching tasks</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/compact</span>
+          <span class="mono dim" style="font-size:0.85rem;">Manual compression, can specify focus to retain</span>
+        </div>
+      </div>
+      <!-- Level 2 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #a84;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#a84;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 2&nbsp;&nbsp;Intermediate</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">CLAUDE.md &lt;200 lines</span>
+          <span class="mono dim" style="font-size:0.85rem;">Keep project instructions concise, avoid overload</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Auto Memory</span>
+          <span class="mono dim" style="font-size:0.85rem;">Persist notes across sessions</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/btw</span>
+          <span class="mono dim" style="font-size:0.85rem;">Side question, not written to history</span>
+        </div>
+      </div>
+      <!-- Level 3 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #48a;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#48a;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 3&nbsp;&nbsp;Advanced</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Subagent delegation</span>
+          <span class="mono dim" style="font-size:0.85rem;">Offload heavy tasks to isolated context</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Skills lazy-load</span>
+          <span class="mono dim" style="font-size:0.85rem;">Load on demand, no permanent footprint</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Pipeline state</span>
+          <span class="mono dim" style="font-size:0.85rem;">JSON state persists phase information</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Multi-session</span>
+          <span class="mono dim" style="font-size:0.85rem;">Split long tasks across sessions</span>
+        </div>
+      </div>
+    </div>
+    <p class="mono dim" style="margin-top:1rem;font-size:0.82rem;text-align:right;">
+      Core principle: <span class="highlight">Actively managing context = sustained high-quality output</span>
+    </p>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/memory, /best-practices</p>
+</section>
+
+
+<!-- ============================================================
+     Part 2: Scenarios & Features  (Slides 13–27)
+     ============================================================ -->
+
+<!-- Slide 13: Part 2 Section Title -->
+<section class="slide section-title-slide">
+  <div class="slide-content">
+    <div class="section-number">Part 2</div>
+    <h1>Scenarios &amp; Feature Practice</h1>
+    <p class="accent" style="font-size:1.6rem; margin-top: 1rem;">Things an IDE assistant can't do</p>
+  </div>
+</section>
+
+<!-- Slide 14: The Big Four Features -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Four Core Features</h2>
+    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem;">
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">⚙ Hook</div>
+        <div>Automation guardrails &amp; triggers</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Deterministic execution, event-driven</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">📚 Skills</div>
+        <div>Reusable domain knowledge</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Machine-readable lab handbook</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🤖 Sub-agent</div>
+        <div>Parallel task decomposition</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Specialist agent with independent context</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🔁 Loop</div>
+        <div>Continuous autonomous monitoring</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Scheduled polling + autonomous response</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: Hook Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook — Event-Driven Automation</h2>
+    <p class="dim" style="margin-bottom: 1.5rem;">Shell scripts triggered by specific events — deterministic execution, not suggestions</p>
+    <div class="terminal-box">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>When Triggered</th>
+            <th>Capabilities</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">PreToolUse</td>
+            <td>Before tool execution</td>
+            <td class="highlight">Block + validate + modify parameters</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PostToolUse</td>
+            <td>After execution</td>
+            <td class="highlight">Format + check + advance pipeline</td>
+          </tr>
+          <tr>
+            <td class="accent mono">Stop</td>
+            <td>About to stop</td>
+            <td class="highlight">Prevent stop + inject reminders</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PreCompact</td>
+            <td>Before compaction</td>
+            <td class="highlight">Set markers + save state</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/hooks-guide</p>
+</section>
+
+<!-- Slide 16: Hook Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook in Practice: Experiment Pipeline</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0;">
+      <div class="mono" style="line-height: 2.2; font-size: 0.95rem;">
+        <span class="accent">dev</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">skill-update</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">experiment</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">monitoring</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">analysis</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">commit</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">dev</span>
+        <span class="dim"> (cycle)</span>
+        <span class="cursor">█</span>
+      </div>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> detects 10+ file edits → reminds to run </span>
+        <span class="highlight mono">/writing-skills</span>
+      </li>
+      <li>
+        <span class="accent mono">PostToolUse</span>
+        <span> detects Skill completion → automatically advances to next stage</span>
+      </li>
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> detects experiment complete → reminds </span>
+        <span class="highlight mono">/slides-dispatch</span>
+      </li>
+      <li>
+        Manual control: <span class="mono dim">pipeline-ctl.sh {status|set|skip|reset}</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 17: Hook Safety Guardrails -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook in Practice: Safety Guardrails</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">slides-guard.sh</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Intercepts direct calls to heavy skills, recommends using </span>
+        <span class="highlight mono">dispatcher</span>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.82rem; padding: 0.6rem 1rem;">
+          <span class="dim">[slides-guard]</span> Direct use of /agent-slides would fill main context.<br>
+          Use <span class="accent">/slides-dispatch</span> instead — delegates to subagent automatically.
+        </div>
+      </li>
+      <li>
+        <span class="accent mono">console.log audit</span>
+        <span class="dim"> — Stop hook</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Audits all modified files before session ends, blocks commits with leftover console.log</span>
+      </li>
+      <li>
+        <span class="accent mono">git push review</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Opens diff in editor for human review before push, executes only after confirmation</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 18: Skills Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills — Machine-Readable Lab Handbook</h2>
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.4rem;">
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">01</span>
+        <div>
+          <div class="highlight">Markdown files, loaded into context on demand</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">Zero token cost when idle; injected with a single command when needed</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">02</span>
+        <div>
+          <div class="highlight">Encodes institutional knowledge that survives across sessions</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">Experiment workflows, paper formats, coding standards — never forgotten</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">03</span>
+        <div>
+          <div class="highlight">"Your research playbook, directly consumable by the agent"</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">From idea to paper, every stage has a corresponding skill</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills</p>
+</section>
+
+<!-- Slide 19: Research Skills Showcase -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Research-Relevant Skills</h2>
+    <div class="terminal-box" style="margin-top: 1.5rem;">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">fars-system</td>
+            <td>FARS fully autonomous research system architecture guide, understanding multi-agent research pipelines</td>
+          </tr>
+          <tr>
+            <td class="accent mono">fars-reviewer</td>
+            <td>Paper review agent logic, completeness audit pipeline and preprocessing</td>
+          </tr>
+          <tr>
+            <td class="accent mono">agent-exp-orchestration</td>
+            <td>Parallel experiment orchestration: job conflicts, rate limiting, subprocess isolation, retries</td>
+          </tr>
+          <tr>
+            <td class="accent mono">rope2sink</td>
+            <td>ICML paper writing — LaTeX editing and attention sink analysis</td>
+          </tr>
+          <tr>
+            <td class="accent mono">weekly-progress</td>
+            <td>Automated weekly report generation, structured experiment progress with file references</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Skills Extensibility -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills Extensibility</h2>
+    <ul class="bullet-list" style="margin-top: 2rem;">
+      <li>
+        <span class="accent mono">writing-skills</span>
+        <span> — Create new skills in a TDD style</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Write expected behaviors first, then iterate on skill content until tests pass</span>
+      </li>
+      <li>
+        <span class="accent mono">find-skills</span>
+        <span> — Discover and install skills from the open ecosystem</span>
+        <br>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.85rem; padding: 0.5rem 1rem;">
+          <span class="dim">$</span> <span class="highlight">npx skills</span> <span class="dim"># browse the community skill directory</span>
+        </div>
+      </li>
+      <li>
+        <span class="highlight">"You can build your own research workflow skills"</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Any repetitive research process can be skill-ified — write once, reuse forever</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 21: Sub-agent Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent — Specialist with Independent Context</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="highlight">Independent context window</span>
+        <span> + system prompt + tools</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Main context stays clean; heavy tasks complete in a disposable context</span>
+      </li>
+      <li>
+        <span>Built-in types:</span>
+        <div style="margin-top: 0.5rem; margin-left: 1.4rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Explore</span> <span class="dim">(Haiku, fast)</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Plan</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">General-purpose</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Custom</span>
+          </span>
+        </div>
+      </li>
+      <li>
+        <span class="dim">⚠ Cannot spawn other subagents</span>
+        <span> — prevents infinite nesting and resource explosion</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 22: Subagent Delegation Pattern -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Subagent Delegation Pattern</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.88rem; line-height: 1.9;">
+      <div class="mono">
+<span class="highlight">Main Context</span> <span class="dim">(clean)</span>            <span class="accent">Subagent Context</span> <span class="dim">(disposable)</span>
+<span class="dim">────────────────────              ─────────────────────────────</span>
+User request                      Read skill.md (~60KB)
+  <span class="dim">|</span>                               Read experiment data
+Gather requirements <span class="dim">(~10 lines)</span>  Generate HTML <span class="dim">(~3000 lines)</span>
+  <span class="dim">|</span>                               Write files
+Spawn Agent tool <span class="accent">──────────────></span>
+  <span class="dim">|</span>                  <span class="accent"><──────────</span>  Return summary <span class="dim">(5 lines)</span>
+Report file path to user
+      </div>
+    </div>
+    <div class="big-quote" style="font-size: 1.05rem;">
+      "Heavy work done in a disposable context, results collected in a clean context"
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 23: Sub-agent Research Applications -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent Research Scenarios</h2>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem;">
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Parallel Execution</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent 1: Read paper → extract methodology<br>
+          Agent 2: Search existing implementations → assess usability<br>
+          Agent 3: Check dataset availability → download plan
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Role-Based Review</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Fact checker:    Data &amp; citation accuracy<br>
+          Security expert: Code security + data privacy<br>
+          Senior engineer: Reproducibility + performance
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Writer / Reviewer Pattern</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent A: Implement experiment code + generate slides<br>
+          Agent B: Independently audit correctness + reproducibility
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 24: Loop -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Loop — Continuous Autonomous Execution</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0; text-align: center; padding: 1.2rem 2rem;">
+      <span class="mono" style="font-size: 1.3rem;">
+        <span class="dim">$</span>
+        <span class="highlight"> /loop </span>
+        <span class="accent">5m</span>
+        <span class="dim"> &lt;command&gt;</span>
+        <span class="cursor">█</span>
+      </span>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent">Training monitoring</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 5m check GPU utilization and training loss</span>
+      </li>
+      <li>
+        <span class="accent">Experiment polling</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 10m check if experiment batch has completed</span>
+      </li>
+      <li>
+        <span class="accent">CI watching</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 3m check GitHub Actions status for latest push</span>
+      </li>
+      <li>
+        <span class="accent">Resource monitoring</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 15m check disk space and memory usage on VPS</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/cli-reference (/loop)</p>
+</section>
+
+<!-- Slide 25: Full Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Full Workflow: Hooks + Skills + Subagents</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.8rem; line-height: 2;">
+      <div class="mono">
+<span class="highlight">Trigger Layer (Hooks)</span>       <span class="accent">State Layer</span>             <span class="highlight">Execution Layer (Skills)</span>
+<span class="dim">┌──────────────────┐         ┌───────────────────┐         ┌──────────────────┐</span>
+<span class="dim">│</span> Stop hook        <span class="dim">│─read──→│</span> current_stage     <span class="dim">│─trigger─→│</span> block + hint     <span class="dim">│</span>
+<span class="dim">│</span> (session end)    <span class="dim">│</span>        <span class="dim">│</span> compact_pending   <span class="dim">│</span>          <span class="dim">│</span> next /skill      <span class="dim">│</span>
+<span class="dim">├──────────────────┤         │</span> last_skill_upd    <span class="dim">│         ├──────────────────┤</span>
+<span class="dim">│</span> PreCompact       <span class="dim">│─flag──→│</span> last_commit       <span class="dim">│</span>          <span class="dim">│</span> user runs        <span class="dim">│</span>
+<span class="dim">├──────────────────┤         └───────────────────┘         │</span> /skill-name      <span class="dim">│</span>
+<span class="dim">│</span> PostToolUse      <span class="dim">│─after Skill──────────────────────────→│</span> advance stage    <span class="dim">│</span>
+<span class="dim">└──────────────────┘                                       └──────────────────┘</span>
+      </div>
+    </div>
+    <div class="mono" style="text-align: center; font-size: 0.9rem;">
+      <span class="accent">dev</span>
+      <span class="dim"> → </span>
+      <span class="highlight">skill-update</span>
+      <span class="dim"> → </span>
+      <span class="accent">experiment</span>
+      <span class="dim"> → </span>
+      <span class="highlight">monitoring</span>
+      <span class="dim"> → </span>
+      <span class="accent">analysis</span>
+      <span class="dim"> → </span>
+      <span class="highlight">commit</span>
+      <span class="dim"> → </span>
+      <span class="accent">dev</span>
+      <span class="dim"> (cycle)</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 26: Before/After — Paper Reproduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: Paper Reproduction</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">IDE Assistant</div>
+        <ol class="bullet-list" style="list-style: decimal; padding-left: 1.2rem;">
+          <li>Read paper</li>
+          <li>Ask AI to explain</li>
+          <li>Manually paste code</li>
+          <li>Run → errors</li>
+          <li>Ask AI to fix</li>
+          <li>Repeat steps 4–5</li>
+          <li>Manually start training</li>
+          <li>Manually monitor progress</li>
+        </ol>
+        <div class="dim" style="margin-top: 0.8rem; font-size: 0.85rem;">8 steps, manual intervention throughout, context frequently lost</div>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Claude Code Agent</div>
+        <div class="terminal-box" style="margin-bottom: 0.8rem; padding: 0.6rem 1rem; font-size: 0.88rem;">
+          <span class="dim">$</span> <span class="highlight">Please reproduce the experiments from this paper</span>
+        </div>
+        <ul class="bullet-list">
+          <li><span class="accent">Autonomously</span> explores codebase + reads paper</li>
+          <li><span class="accent">Autonomously</span> implements model architecture</li>
+          <li><span class="accent">Autonomously</span> runs tests + debugs</li>
+          <li><span class="accent">Autonomously</span> starts training + Loop monitoring</li>
+          <li><span class="accent">Autonomously</span> generates slides + changelog</li>
+        </ul>
+        <div class="highlight" style="margin-top: 0.8rem; font-size: 0.85rem;">1 prompt → fully autonomous execution</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 27: Before/After — Experiment Lifecycle -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: Experiment Lifecycle</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">Traditional Workflow</div>
+        <ul class="bullet-list">
+          <li>Manually tracking experiment state<br><span class="dim" style="font-size: 0.82rem;">Spreadsheets/notes, easy to miss things</span></li>
+          <li>Context lost after session ends<br><span class="dim" style="font-size: 0.82rem;">Must re-explain background next time</span></li>
+          <li>No automatic reminder for next step<br><span class="dim" style="font-size: 0.82rem;">Memory-dependent, critical steps easily forgotten</span></li>
+          <li>Results scattered everywhere<br><span class="dim" style="font-size: 0.82rem;">slides / logs / notes in different places</span></li>
+        </ul>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Pipeline + Hooks Workflow</div>
+        <ul class="bullet-list">
+          <li><span class="accent">Pipeline hooks</span> auto-track stages<br><span class="dim" style="font-size: 0.82rem;">state.json persisted, queryable anytime</span></li>
+          <li><span class="accent">Memory</span> retains knowledge across sessions<br><span class="dim" style="font-size: 0.82rem;">CLAUDE.md + skills never forgotten</span></li>
+          <li><span class="accent">Stop hook</span> auto-reminds next step<br><span class="dim" style="font-size: 0.82rem;">Deterministic execution, no memory dependency</span></li>
+          <li><span class="accent">Auto-generates</span> slides + changelog<br><span class="dim" style="font-size: 0.82rem;">Output ready when experiment ends, unified archive</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Part 3: Documentation & Management (Slides 28-35) -->
+
+<!-- Slide 28: Part 3 Section Title -->
+<section class="slide section-title-slide" data-slide="28">
+  <div class="slide-content">
+    <div class="section-number reveal">Part 3</div>
+    <h1 class="reveal">Documentation &amp; Management Tips</h1>
+    <p class="accent reveal" style="font-size: 1.4rem; margin-top: 1rem;">
+      Engineer your Harness, not just your Prompt
+    </p>
+  </div>
+</section>
+
+<!-- Slide 29: Harness Engineering -->
+<section class="slide" data-slide="29">
+  <div class="slide-content">
+    <h2 class="reveal">The Core Philosophy of Harness Engineering</h2>
+    <div class="big-quote reveal">
+      "In Cursor, you engineer Prompts. In Claude Code, you engineer the Harness."
+    </div>
+    <ul class="bullet-list reveal" style="margin-top: 2rem;">
+      <li>
+        <span class="accent mono">Harness</span>
+        <span class="dim"> = </span>
+        <span class="highlight">CLAUDE.md</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Hooks</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Skills</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Subagents</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Pipeline</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 30: Three Papers -->
+<section class="slide" data-slide="30">
+  <div class="slide-content">
+    <h2 class="reveal">Three Foundational Harness Engineering Articles</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem;">
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">OpenAI</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Systems production engineering</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Repository knowledge</li>
+          <li><span class="dim">›</span> Agent legibility</li>
+          <li><span class="dim">›</span> Architectural boundaries</li>
+        </ul>
+      </div>
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">Anthropic</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Long-running agent framework</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Task segmentation</li>
+          <li><span class="dim">›</span> State persistence</li>
+          <li><span class="dim">›</span> Error recovery / self-check</li>
+        </ul>
+      </div>
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">Manus</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Working memory management</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Information density</li>
+          <li><span class="dim">›</span> Relevance</li>
+          <li><span class="dim">›</span> Recency</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.82rem;" class="reveal">
+      <span class="dim">OpenAI focuses on systems engineering &nbsp;/&nbsp; Anthropic on runtime frameworks &nbsp;/&nbsp; Manus on context management</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Sources: openai.com/index/harness-engineering &middot; anthropic.com/engineering/effective-harnesses-for-long-running-agents &middot; manus.im/blog/context-engineering</p>
+</section>
+
+<!-- Slide 31: CLAUDE.md Best Practices -->
+<section class="slide" data-slide="31">
+  <div class="slide-content">
+    <h2 class="reveal">CLAUDE.md Best Practices</h2>
+    <div class="comparison-grid reveal" style="margin-top: 1.5rem;">
+      <div class="comparison-col">
+        <div style="color: #4ade80; font-weight: bold; font-size: 1rem; margin-bottom: 1rem; text-align: center;">
+          DO <span class="mono" style="font-size: 0.8rem;">include</span>
+        </div>
+        <ul class="bullet-list">
+          <li>Build commands <span class="mono dim">(build / test / lint)</span></li>
+          <li>Code style preferences <span class="mono dim">(const/let, types)</span></li>
+          <li>Testing guidelines <span class="mono dim">(framework, coverage requirements)</span></li>
+          <li>Architectural decisions <span class="mono dim">(directory structure, layering rules)</span></li>
+        </ul>
+      </div>
+      <div class="comparison-col">
+        <div style="color: #f87171; font-weight: bold; font-size: 1rem; margin-bottom: 1rem; text-align: center;">
+          DON'T <span class="mono" style="font-size: 0.8rem;">include</span>
+        </div>
+        <ul class="bullet-list">
+          <li>Things Claude can infer on its own</li>
+          <li>Standard industry conventions <span class="mono dim">(universally known)</span></li>
+          <li>Detailed API docs <span class="mono dim">(use Skills instead)</span></li>
+          <li>Frequently changing configs <span class="mono dim">(go stale quickly)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="terminal-box reveal" style="margin-top: 1.5rem; font-size: 0.82rem; text-align: center; padding: 0.8rem 1.2rem;">
+      <span class="accent mono">Hooks</span>
+      <span class="dim"> &gt; </span>
+      <span class="mono">CLAUDE.md</span>
+      <span class="dim"> (100% enforced, cannot be bypassed) &nbsp;&nbsp;|&nbsp;&nbsp; </span>
+      <span class="accent mono">Skills</span>
+      <span class="dim"> &gt; </span>
+      <span class="mono">CLAUDE.md</span>
+      <span class="dim"> (occasional knowledge, loaded on demand)</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>
+
+<!-- Slide 32: 9 Principles -->
+<section class="slide" data-slide="32">
+  <div class="slide-content">
+    <h2 class="reveal">9 Coding Agent Principles</h2>
+    <div class="feature-grid reveal" style="grid-template-columns: repeat(3, 1fr); margin-top: 1.2rem; gap: 0.8rem;">
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Less is More</div>
+        <div class="dim" style="font-size: 0.75rem;">Skip the plugins — basic CLI is enough</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Context is Everything</div>
+        <div class="dim" style="font-size: 0.75rem;">Separate research and implementation phases, precise instructions</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Use Sycophancy</div>
+        <div class="dim" style="font-size: 0.75rem;">Use neutral prompts to prevent agent hallucination</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Avoid Fill-in-the-Blank</div>
+        <div class="dim" style="font-size: 0.75rem;">Set rules in CLAUDE.md to prevent wild guessing</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Define the Finish Line</div>
+        <div class="dim" style="font-size: 0.75rem;">Test-driven / CONTRACT.md acceptance criteria</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">CLAUDE.md as Logic Index</div>
+        <div class="dim" style="font-size: 0.75rem;">Write IF-ELSE tree pointing to rule files, not an encyclopedia</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Rules vs Skills</div>
+        <div class="dim" style="font-size: 0.75rem;">Rules = preferences; Skills = execution recipes</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Regular Cleanup</div>
+        <div class="dim" style="font-size: 0.75rem;">Let the agent self-organize, removing conflicting rules</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Don't Chase New Tools</div>
+        <div class="dim" style="font-size: 0.75rem;">Official integrations are what actually matter</div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @systematicls on X — "Coding Agent Best Practices"</p>
+</section>
+
+<!-- Slide 33: Boris Tips 1-5 -->
+<section class="slide" data-slide="33">
+  <div class="slide-content">
+    <h2 class="reveal">Boris Cherny 10 Tips <span class="dim">(1–5)</span></h2>
+    <ul class="bullet-list reveal" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">1.</span>
+        <strong> git worktree for parallel sessions</strong>
+        <span class="dim"> — Run multiple Claude instances simultaneously without interference</span>
+      </li>
+      <li>
+        <span class="accent mono">2.</span>
+        <strong> Plan Mode before implementing</strong>
+        <span class="dim"> — One Claude writes the plan, another Claude audits it</span>
+      </li>
+      <li>
+        <span class="accent mono">3.</span>
+        <strong> Update CLAUDE.md after every correction</strong>
+        <span class="dim"> — Write the rule in, prevent the same class of error from recurring</span>
+      </li>
+      <li>
+        <span class="accent mono">4.</span>
+        <strong> Turn daily operations into Skills</strong>
+        <span class="dim"> — Any operation used &gt;1x per day becomes a custom slash command</span>
+      </li>
+      <li>
+        <span class="accent mono">5.</span>
+        <strong> Slack MCP lets Claude fix bugs independently</strong>
+        <span class="dim"> — Paste bug thread, let Claude autonomously inspect CI logs</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @bcherny (Boris Cherny) Twitter thread, 2026-01-31</p>
+</section>
+
+<!-- Slide 34: Boris Tips 6-10 -->
+<section class="slide" data-slide="34">
+  <div class="slide-content">
+    <h2 class="reveal">Boris Cherny 10 Tips <span class="dim">(6–10)</span></h2>
+    <ul class="bullet-list reveal" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">6.</span>
+        <strong> Claude as reviewer to challenge code</strong>
+        <span class="dim"> — Have Claude play the reviewer, demand a more elegant rewrite</span>
+      </li>
+      <li>
+        <span class="accent mono">7.</span>
+        <strong> Ghostty terminal + voice input</strong>
+        <span class="dim"> — Better rendering + voice input makes prompts more detailed</span>
+      </li>
+      <li>
+        <span class="accent mono">8.</span>
+        <strong> <span class="mono highlight">"use subagents"</span> to invest more compute</strong>
+        <span class="dim"> — Append the keyword, keep main context clean</span>
+      </li>
+      <li>
+        <span class="accent mono">9.</span>
+        <strong> Use BigQuery and other CLIs directly for analysis</strong>
+        <span class="dim"> — No hand-written SQL needed; Claude operates databases for real-time analysis</span>
+      </li>
+      <li>
+        <span class="accent mono">10.</span>
+        <strong> Generate HTML presentations to learn code</strong>
+        <span class="dim"> — Have Claude generate visual explanations, ASCII architecture diagrams for comprehension</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @bcherny (Boris Cherny) Twitter thread, 2026-01-31</p>
+</section>
+
+<!-- Slide 35: Failure Patterns -->
+<section class="slide" data-slide="35">
+  <div class="slide-content">
+    <h2 class="reveal">Common Failure Patterns</h2>
+    <div class="terminal-table reveal" style="margin-top: 1.2rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--accent);">
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: var(--accent); font-weight: bold; width: 22%;">Failure Pattern</th>
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: var(--dim); width: 38%;">Problem</th>
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: #4ade80; width: 40%;">Solution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Kitchen Sink Session</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Mixing unrelated tasks into the same session, polluting context</td>
+            <td style="padding: 0.55rem 0.8rem;">Run <span class="mono accent">/clear</span> before switching tasks</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Repeated Corrections</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Failed attempts pile up, context filled with error history</td>
+            <td style="padding: 0.55rem 0.8rem;">After 2 corrections, run <span class="mono accent">/clear</span> and give a fresh context</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">CLAUDE.md Too Long</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Too much content gets ignored, conflicting rules can't be enforced</td>
+            <td style="padding: 0.55rem 0.8rem;">Ruthlessly trim, switch to IF-ELSE logic index + Skills</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Trust-Verification Gap</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Edge cases not covered, agent quietly goes off the rails</td>
+            <td style="padding: 0.55rem 0.8rem;">Always provide verifiable completion criteria <span class="mono dim">(CONTRACT.md)</span></td>
+          </tr>
+          <tr>
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Infinite Exploration</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Still exploring aimlessly as context nears exhaustion</td>
+            <td style="padding: 0.55rem 0.8rem;">Narrow task scope, or isolate exploration with a <span class="mono accent">subagent</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>
+
+
+<!-- Slide 36: Key Takeaways -->
+<section class="slide">
+  <div class="slide-content">
+    <h2 class="reveal">Key Takeaways</h2>
+    <ul class="bullet-list">
+      <li class="reveal">
+        <span class="accent highlight">1.</span>
+        This is a <strong>paradigm shift</strong>, not a tool replacement
+      </li>
+      <li class="reveal">
+        <span class="accent highlight">2.</span>
+        Engineer your <span class="mono">Harness</span>:
+        <span class="accent">Hooks</span> +
+        <span class="accent">Skills</span> +
+        <span class="accent">Subagents</span> +
+        <span class="accent">Loop</span>
+      </li>
+      <li class="reveal">
+        <span class="accent highlight">3.</span>
+        <span class="mono">Context</span> is your most critical resource &mdash; <strong>manage it actively</strong>
+      </li>
+      <li class="reveal">
+        <span class="accent highlight">4.</span>
+        Build <strong>reusable workflows</strong>, not one-off <span class="mono">Prompts</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 37: References (Full Reading List) -->
+<section class="slide">
+  <div class="slide-content">
+    <h2 class="reveal">Further Reading</h2>
+    <div class="reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(0.6rem,1.2vw,1rem);margin-top:clamp(0.8rem,1.5vh,1.2rem);">
+      <!-- Column 1: Official Docs + Harness Papers -->
+      <div style="display:flex;flex-direction:column;gap:clamp(0.5rem,1vh,0.8rem);">
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">OFFICIAL DOCS</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div>code.claude.com/docs/en/overview</div>
+            <div>code.claude.com/docs/en/best-practices</div>
+            <div>code.claude.com/docs/en/how-claude-code-works</div>
+            <div>code.claude.com/docs/en/memory</div>
+            <div>code.claude.com/docs/en/hooks-guide</div>
+            <div>code.claude.com/docs/en/skills</div>
+            <div>code.claude.com/docs/en/sub-agents</div>
+            <div>code.claude.com/docs/en/features-overview</div>
+          </div>
+        </div>
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">HARNESS ENGINEERING</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div><span class="highlight">OpenAI</span> &mdash; openai.com/index/harness-engineering</div>
+            <div><span class="highlight">Anthropic</span> &mdash; anthropic.com/engineering/effective-harnesses-for-long-running-agents</div>
+            <div><span class="highlight">Manus</span> &mdash; manus.im/blog/context-engineering</div>
+            <div><span class="highlight">Anthropic</span> &mdash; anthropic.com/engineering/effective-context-engineering-for-ai-agents</div>
+          </div>
+        </div>
+      </div>
+      <!-- Column 2: People + Community -->
+      <div style="display:flex;flex-direction:column;gap:clamp(0.5rem,1vh,0.8rem);">
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">KEY PEOPLE</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div><span class="highlight">@bcherny</span> &mdash; Boris Cherny, Claude Code creator — 10 Tips thread</div>
+            <div><span class="highlight">@systematicls</span> &mdash; 9 Coding Agent Principles</div>
+            <div><span class="highlight">@HiTw93</span> &mdash; Tw93, deep dive into Claude Code's six-layer architecture</div>
+          </div>
+        </div>
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">GITHUB</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div>anthropics/claude-code <span class="highlight">(78.1k stars)</span></div>
+            <div>anthropics/skills — Skill Creator Guide</div>
+            <div>obra/superpowers — Full dev workflow (14 Skills + Subagent-Driven Dev)</div>
+            <div>affaan-m/everything-claude-code</div>
+          </div>
+        </div>
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">COMMUNITY &amp; TOOLS</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div>skills.sh &mdash; MCP Skill Marketplace</div>
+            <div>clawhub.com &mdash; Agent Reach</div>
+            <div>platform.claude.com/docs/en/agent-sdk</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 38: End -->
+<section class="slide section-title-slide">
+  <div class="slide-content">
+    <h1 class="reveal">Questions?<span class="cursor">&#x258C;</span></h1>
+    <blockquote class="big-quote reveal">
+      "The future belongs to those who <strong>engineer the Agent</strong>,<br>
+      not merely <span class="mono">Prompt</span> it."
+    </blockquote>
+    <p class="dim reveal">
+      &mdash; @sum_young &nbsp;|&nbsp; 2026-03-16
+    </p>
+  </div>
+</section>
+
+
+    <script>
+/* ===========================================
+   SLIDE PRESENTATION CONTROLLER
+   =========================================== */
+class SlidePresentation {
+    constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.currentSlide = 0;
+        this.isScrolling = false;
+        this.progressBar = document.getElementById('progressBar');
+        this.navDots = document.getElementById('navDots');
+        this.slideCounter = document.getElementById('slideCounter');
+
+        this.createNavDots();
+        this.setupIntersectionObserver();
+        this.setupKeyboard();
+        this.setupWheel();
+        this.setupTouch();
+        this.updateProgress();
+    }
+
+    createNavDots() {
+        this.slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', `Slide ${i + 1}`);
+            dot.addEventListener('click', () => this.goTo(i));
+            this.navDots.appendChild(dot);
+        });
+    }
+
+    setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    const index = Array.from(this.slides).indexOf(entry.target);
+                    if (index !== -1) {
+                        this.currentSlide = index;
+                        this.updateProgress();
+                        this.updateDots();
+                    }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        this.slides.forEach(slide => observer.observe(slide));
+    }
+
+    setupKeyboard() {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                this.next();
+            } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                e.preventDefault();
+                this.prev();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                this.goTo(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                this.goTo(this.slides.length - 1);
+            }
+        });
+    }
+
+    setupWheel() {
+        let lastWheel = 0;
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const now = Date.now();
+            if (now - lastWheel < 800) return;
+            lastWheel = now;
+            const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            if (delta > 0) this.next();
+            else if (delta < 0) this.prev();
+        }, { passive: false });
+    }
+
+    setupTouch() {
+        let startX = 0;
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) this.next();
+                else this.prev();
+            }
+        }, { passive: true });
+    }
+
+    goTo(index) {
+        if (index >= 0 && index < this.slides.length) {
+            this.slides[index].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+        }
+    }
+
+    next() { this.goTo(this.currentSlide + 1); }
+    prev() { this.goTo(this.currentSlide - 1); }
+
+    updateProgress() {
+        const pct = ((this.currentSlide + 1) / this.slides.length) * 100;
+        this.progressBar.style.width = pct + '%';
+        this.slideCounter.textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+    }
+
+    updateDots() {
+        const dots = this.navDots.querySelectorAll('.nav-dot');
+        dots.forEach((d, i) => d.classList.toggle('active', i === this.currentSlide));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => new SlidePresentation());
+    </script>
+</body>
+</html>

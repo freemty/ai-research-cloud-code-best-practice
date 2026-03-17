@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+
+# Node
+node_modules/
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Misc
+*.log
+.claude/
+
+# Demo generated files
+demos/subagent-needle/haystack/
+demos/subagent-needle/__pycache__/
+demos/hook-guardrail/src/__pycache__/
+demos/hook-guardrail/src/.pytest_cache/

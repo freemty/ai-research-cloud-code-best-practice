@@ -1,0 +1,490 @@
+<!-- ============================================================
+     Part 2: Scenarios & Features  (Slides 13–27)
+     ============================================================ -->
+
+<!-- Slide 13: Part 2 Section Title -->
+<section class="slide section-title-slide">
+  <div class="slide-content">
+    <div class="section-number">Part 2</div>
+    <h1>场景与功能实践</h1>
+    <p class="accent" style="font-size:1.6rem; margin-top: 1rem;">IDE 助手做不到的事</p>
+  </div>
+</section>
+
+<!-- Slide 14: The Big Four Features -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>四大核心 Feature</h2>
+    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem;">
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">⚙ Hook</div>
+        <div>自动化护栏与触发器</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">事件驱动的确定性执行</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">📚 Skills</div>
+        <div>可复用领域知识</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">机器可读的实验室手册</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🤖 Sub-agent</div>
+        <div>并行任务分解</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">独立 context 的专家代理</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🔁 Loop</div>
+        <div>循环自主监控</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">定时轮询 + 自主响应</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: Hook Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook — 事件驱动的自动化</h2>
+    <p class="dim" style="margin-bottom: 1.5rem;">Shell 脚本在特定事件触发 — 确定性执行，不是建议</p>
+    <div class="terminal-box">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>类型</th>
+            <th>触发时机</th>
+            <th>能力</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">PreToolUse</td>
+            <td>工具执行前</td>
+            <td class="highlight">阻止 + 验证 + 修改参数</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PostToolUse</td>
+            <td>执行后</td>
+            <td class="highlight">格式化 + 检查 + 推进流水线</td>
+          </tr>
+          <tr>
+            <td class="accent mono">Stop</td>
+            <td>即将停止时</td>
+            <td class="highlight">阻止停止 + 注入提醒</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PreCompact</td>
+            <td>压缩前</td>
+            <td class="highlight">设标记 + 保存状态</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/hooks-guide</p>
+</section>
+
+<!-- Slide 16: Hook Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook 实战: 实验流水线</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0;">
+      <div class="mono" style="line-height: 2.2; font-size: 0.95rem;">
+        <span class="accent">dev</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">skill-update</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">experiment</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">monitoring</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">analysis</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">commit</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">dev</span>
+        <span class="dim"> (cycle)</span>
+        <span class="cursor">█</span>
+      </div>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> 检测到 10+ 文件编辑 → 提醒运行 </span>
+        <span class="highlight mono">/writing-skills</span>
+      </li>
+      <li>
+        <span class="accent mono">PostToolUse</span>
+        <span> 检测 Skill 完成 → 自动推进到下一阶段</span>
+      </li>
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> 检测实验完成 → 提醒 </span>
+        <span class="highlight mono">/slides-dispatch</span>
+      </li>
+      <li>
+        手动控制: <span class="mono dim">pipeline-ctl.sh {status|set|skip|reset}</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 17: Hook Safety Guardrails -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook 实战: 安全护栏</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">slides-guard.sh</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">拦截对重型 skill 的直接调用，建议使用 </span>
+        <span class="highlight mono">dispatcher</span>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.82rem; padding: 0.6rem 1rem;">
+          <span class="dim">[slides-guard]</span> Direct use of /agent-slides would fill main context.<br>
+          Use <span class="accent">/slides-dispatch</span> instead — delegates to subagent automatically.
+        </div>
+      </li>
+      <li>
+        <span class="accent mono">console.log audit</span>
+        <span class="dim"> — Stop hook</span>
+        <br>
+        <span style="margin-left: 1.4rem;">会话结束前审计所有修改文件，阻止残留 console.log 提交</span>
+      </li>
+      <li>
+        <span class="accent mono">git push review</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">推送前在编辑器中打开 diff 供人工审查，确认后再执行</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 18: Skills Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills — 机器可读的实验室手册</h2>
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.4rem;">
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">01</span>
+        <div>
+          <div class="highlight">Markdown 文件，按需加载到 context</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">不用时不占用 token；需要时一行命令注入</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">02</span>
+        <div>
+          <div class="highlight">编码跨 session 生存的制度知识</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">实验流程、论文格式、代码规范 — 永不遗忘</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">03</span>
+        <div>
+          <div class="highlight">"你的研究 playbook，agent 可直接消费"</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">从 idea 到 paper，每个阶段都有对应 skill</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills</p>
+</section>
+
+<!-- Slide 19: Research Skills Showcase -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>研究相关 Skills</h2>
+    <div class="terminal-box" style="margin-top: 1.5rem;">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">fars-system</td>
+            <td>FARS 全自主研究系统架构指南，理解多 agent 研究流水线</td>
+          </tr>
+          <tr>
+            <td class="accent mono">fars-reviewer</td>
+            <td>论文 review agent 逻辑，完整性审计流水线与预处理</td>
+          </tr>
+          <tr>
+            <td class="accent mono">agent-exp-orchestration</td>
+            <td>并行实验编排：job 冲突、限速、子进程隔离、重试</td>
+          </tr>
+          <tr>
+            <td class="accent mono">rope2sink</td>
+            <td>ICML 论文写作 — LaTeX 编辑与 attention sink 分析</td>
+          </tr>
+          <tr>
+            <td class="accent mono">weekly-progress</td>
+            <td>自动化周报生成，结构化实验进展与文件引用</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Skills Extensibility -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills 的可扩展性</h2>
+    <ul class="bullet-list" style="margin-top: 2rem;">
+      <li>
+        <span class="accent mono">writing-skills</span>
+        <span> — 用 TDD 方式创建新 skill</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">先写期望行为，再迭代 skill 内容直到满足测试</span>
+      </li>
+      <li>
+        <span class="accent mono">find-skills</span>
+        <span> — 从开放生态发现并安装 skill</span>
+        <br>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.85rem; padding: 0.5rem 1rem;">
+          <span class="dim">$</span> <span class="highlight">npx skills</span> <span class="dim"># 浏览社区 skill 目录</span>
+        </div>
+      </li>
+      <li>
+        <span class="highlight">"你可以构建自己的研究工作流 skill"</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">任何重复性研究流程都可以 skill 化，一次编写，永久复用</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 21: Sub-agent Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent — 独立上下文的专家</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="highlight">独立 context window</span>
+        <span> + system prompt + tools</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">主 context 保持干净，重任务在一次性 context 里完成</span>
+      </li>
+      <li>
+        <span>内置类型:</span>
+        <div style="margin-top: 0.5rem; margin-left: 1.4rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Explore</span> <span class="dim">(Haiku, 快速)</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Plan</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">General-purpose</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Custom</span>
+          </span>
+        </div>
+      </li>
+      <li>
+        <span class="dim">⚠ 不能 spawn 其他 subagent</span>
+        <span> — 防止无限嵌套与资源爆炸</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 22: Subagent Delegation Pattern -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Subagent Delegation Pattern</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.88rem; line-height: 1.9;">
+      <div class="mono">
+<span class="highlight">Main Context</span> <span class="dim">(clean)</span>            <span class="accent">Subagent Context</span> <span class="dim">(disposable)</span>
+<span class="dim">────────────────────              ─────────────────────────────</span>
+User request                      读取 skill.md (~60KB)
+  <span class="dim">|</span>                               读取实验数据
+收集需求 <span class="dim">(~10 lines)</span>            生成 HTML <span class="dim">(~3000 lines)</span>
+  <span class="dim">|</span>                               写入文件
+Spawn Agent tool <span class="accent">──────────────></span>
+  <span class="dim">|</span>                  <span class="accent"><──────────</span>  返回 summary <span class="dim">(5 lines)</span>
+向用户报告文件路径
+      </div>
+    </div>
+    <div class="big-quote" style="font-size: 1.05rem;">
+      "重活在一次性 context 里做，结果在干净 context 里收"
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 23: Sub-agent Research Applications -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent 研究场景</h2>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem;">
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">并行执行</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent 1: 读论文 → 提取方法论<br>
+          Agent 2: 搜索已有实现 → 评估可用性<br>
+          Agent 3: 查数据集可用性 → 下载方案
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">分角色审查</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          事实审查员: 数据与引用准确性<br>
+          安全专家:   代码安全 + 数据隐私<br>
+          资深工程师: 可复现性 + 性能
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Writer / Reviewer 模式</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent A: 实现实验代码 + 生成 slides<br>
+          Agent B: 独立审计正确性 + 可复现性
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 24: Loop -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Loop — 循环自主执行</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0; text-align: center; padding: 1.2rem 2rem;">
+      <span class="mono" style="font-size: 1.3rem;">
+        <span class="dim">$</span>
+        <span class="highlight"> /loop </span>
+        <span class="accent">5m</span>
+        <span class="dim"> &lt;command&gt;</span>
+        <span class="cursor">█</span>
+      </span>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent">训练监控</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 5m check GPU utilization and training loss</span>
+      </li>
+      <li>
+        <span class="accent">实验轮询</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 10m check if experiment batch has completed</span>
+      </li>
+      <li>
+        <span class="accent">CI 观察</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 3m check GitHub Actions status for latest push</span>
+      </li>
+      <li>
+        <span class="accent">资源监控</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 15m check disk space and memory usage on VPS</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/cli-reference (/loop)</p>
+</section>
+
+<!-- Slide 25: Full Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>完整工作流: Hooks + Skills + Subagents</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.8rem; line-height: 2;">
+      <div class="mono">
+<span class="highlight">Trigger Layer (Hooks)</span>       <span class="accent">State Layer</span>             <span class="highlight">Execution Layer (Skills)</span>
+<span class="dim">┌──────────────────┐         ┌───────────────────┐         ┌──────────────────┐</span>
+<span class="dim">│</span> Stop hook        <span class="dim">│─read──→│</span> current_stage     <span class="dim">│─trigger─→│</span> block + hint     <span class="dim">│</span>
+<span class="dim">│</span> (session end)    <span class="dim">│</span>        <span class="dim">│</span> compact_pending   <span class="dim">│</span>          <span class="dim">│</span> next /skill      <span class="dim">│</span>
+<span class="dim">├──────────────────┤         │</span> last_skill_upd    <span class="dim">│         ├──────────────────┤</span>
+<span class="dim">│</span> PreCompact       <span class="dim">│─flag──→│</span> last_commit       <span class="dim">│</span>          <span class="dim">│</span> user runs        <span class="dim">│</span>
+<span class="dim">├──────────────────┤         └───────────────────┘         │</span> /skill-name      <span class="dim">│</span>
+<span class="dim">│</span> PostToolUse      <span class="dim">│─after Skill──────────────────────────→│</span> advance stage    <span class="dim">│</span>
+<span class="dim">└──────────────────┘                                       └──────────────────┘</span>
+      </div>
+    </div>
+    <div class="mono" style="text-align: center; font-size: 0.9rem;">
+      <span class="accent">dev</span>
+      <span class="dim"> → </span>
+      <span class="highlight">skill-update</span>
+      <span class="dim"> → </span>
+      <span class="accent">experiment</span>
+      <span class="dim"> → </span>
+      <span class="highlight">monitoring</span>
+      <span class="dim"> → </span>
+      <span class="accent">analysis</span>
+      <span class="dim"> → </span>
+      <span class="highlight">commit</span>
+      <span class="dim"> → </span>
+      <span class="accent">dev</span>
+      <span class="dim"> (cycle)</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 26: Before/After — Paper Reproduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: 论文复现</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">IDE 助手</div>
+        <ol class="bullet-list" style="list-style: decimal; padding-left: 1.2rem;">
+          <li>读论文</li>
+          <li>问 AI 解释</li>
+          <li>手动粘贴代码</li>
+          <li>运行 → 报错</li>
+          <li>问 AI 修复</li>
+          <li>重复 4-5 步</li>
+          <li>手动启动训练</li>
+          <li>手动监控进度</li>
+        </ol>
+        <div class="dim" style="margin-top: 0.8rem; font-size: 0.85rem;">8 步，全程手动介入，context 频繁丢失</div>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Claude Code Agent</div>
+        <div class="terminal-box" style="margin-bottom: 0.8rem; padding: 0.6rem 1rem; font-size: 0.88rem;">
+          <span class="dim">$</span> <span class="highlight">请复现这篇论文的实验</span>
+        </div>
+        <ul class="bullet-list">
+          <li><span class="accent">自主</span> 探索代码库 + 读论文</li>
+          <li><span class="accent">自主</span> 实现模型架构</li>
+          <li><span class="accent">自主</span> 运行测试 + 调试</li>
+          <li><span class="accent">自主</span> 启动训练 + Loop 监控</li>
+          <li><span class="accent">自主</span> 生成 slides + changelog</li>
+        </ul>
+        <div class="highlight" style="margin-top: 0.8rem; font-size: 0.85rem;">1 prompt → 全自主执行</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 27: Before/After — Experiment Lifecycle -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: 实验生命周期</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">传统工作方式</div>
+        <ul class="bullet-list">
+          <li>手动追踪实验状态<br><span class="dim" style="font-size: 0.82rem;">表格/笔记，容易遗漏</span></li>
+          <li>Context 在 session 结束后丢失<br><span class="dim" style="font-size: 0.82rem;">下次要重新解释背景</span></li>
+          <li>无自动提醒下一步<br><span class="dim" style="font-size: 0.82rem;">靠记忆，易遗忘关键步骤</span></li>
+          <li>结果散落各处<br><span class="dim" style="font-size: 0.82rem;">slides / logs / notes 不同位置</span></li>
+        </ul>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Pipeline + Hooks 工作方式</div>
+        <ul class="bullet-list">
+          <li><span class="accent">Pipeline hooks</span> 自动追踪阶段<br><span class="dim" style="font-size: 0.82rem;">state.json 持久化，随时查询</span></li>
+          <li><span class="accent">Memory</span> 跨 session 保留知识<br><span class="dim" style="font-size: 0.82rem;">CLAUDE.md + skills 永不遗忘</span></li>
+          <li><span class="accent">Stop hook</span> 自动提醒下一步<br><span class="dim" style="font-size: 0.82rem;">确定性执行，不依赖记忆</span></li>
+          <li><span class="accent">自动生成</span> slides + changelog<br><span class="dim" style="font-size: 0.82rem;">实验结束即产出，统一归档</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,37 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TOOL_NAME=$TOOL_NAME demos/hook-guardrail/hooks/block-data-delete.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "TOOL_NAME=$TOOL_NAME demos/hook-guardrail/hooks/auto-test.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "demos/hook-guardrail/hooks/check-uncommitted.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

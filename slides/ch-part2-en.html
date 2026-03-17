@@ -1,0 +1,490 @@
+<!-- ============================================================
+     Part 2: Scenarios & Features  (Slides 13–27)
+     ============================================================ -->
+
+<!-- Slide 13: Part 2 Section Title -->
+<section class="slide section-title-slide">
+  <div class="slide-content">
+    <div class="section-number">Part 2</div>
+    <h1>Scenarios &amp; Feature Practice</h1>
+    <p class="accent" style="font-size:1.6rem; margin-top: 1rem;">Things an IDE assistant can't do</p>
+  </div>
+</section>
+
+<!-- Slide 14: The Big Four Features -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Four Core Features</h2>
+    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem;">
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">⚙ Hook</div>
+        <div>Automation guardrails &amp; triggers</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Deterministic execution, event-driven</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">📚 Skills</div>
+        <div>Reusable domain knowledge</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Machine-readable lab handbook</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🤖 Sub-agent</div>
+        <div>Parallel task decomposition</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Specialist agent with independent context</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🔁 Loop</div>
+        <div>Continuous autonomous monitoring</div>
+        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">Scheduled polling + autonomous response</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: Hook Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook — Event-Driven Automation</h2>
+    <p class="dim" style="margin-bottom: 1.5rem;">Shell scripts triggered by specific events — deterministic execution, not suggestions</p>
+    <div class="terminal-box">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>When Triggered</th>
+            <th>Capabilities</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">PreToolUse</td>
+            <td>Before tool execution</td>
+            <td class="highlight">Block + validate + modify parameters</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PostToolUse</td>
+            <td>After execution</td>
+            <td class="highlight">Format + check + advance pipeline</td>
+          </tr>
+          <tr>
+            <td class="accent mono">Stop</td>
+            <td>About to stop</td>
+            <td class="highlight">Prevent stop + inject reminders</td>
+          </tr>
+          <tr>
+            <td class="accent mono">PreCompact</td>
+            <td>Before compaction</td>
+            <td class="highlight">Set markers + save state</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/hooks-guide</p>
+</section>
+
+<!-- Slide 16: Hook Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook in Practice: Experiment Pipeline</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0;">
+      <div class="mono" style="line-height: 2.2; font-size: 0.95rem;">
+        <span class="accent">dev</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">skill-update</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">experiment</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">monitoring</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">analysis</span>
+        <span class="dim"> ──→ </span>
+        <span class="highlight">commit</span>
+        <span class="dim"> ──→ </span>
+        <span class="accent">dev</span>
+        <span class="dim"> (cycle)</span>
+        <span class="cursor">█</span>
+      </div>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> detects 10+ file edits → reminds to run </span>
+        <span class="highlight mono">/writing-skills</span>
+      </li>
+      <li>
+        <span class="accent mono">PostToolUse</span>
+        <span> detects Skill completion → automatically advances to next stage</span>
+      </li>
+      <li>
+        <span class="accent mono">Stop hook</span>
+        <span> detects experiment complete → reminds </span>
+        <span class="highlight mono">/slides-dispatch</span>
+      </li>
+      <li>
+        Manual control: <span class="mono dim">pipeline-ctl.sh {status|set|skip|reset}</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 17: Hook Safety Guardrails -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Hook in Practice: Safety Guardrails</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">slides-guard.sh</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Intercepts direct calls to heavy skills, recommends using </span>
+        <span class="highlight mono">dispatcher</span>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.82rem; padding: 0.6rem 1rem;">
+          <span class="dim">[slides-guard]</span> Direct use of /agent-slides would fill main context.<br>
+          Use <span class="accent">/slides-dispatch</span> instead — delegates to subagent automatically.
+        </div>
+      </li>
+      <li>
+        <span class="accent mono">console.log audit</span>
+        <span class="dim"> — Stop hook</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Audits all modified files before session ends, blocks commits with leftover console.log</span>
+      </li>
+      <li>
+        <span class="accent mono">git push review</span>
+        <span class="dim"> — PreToolUse</span>
+        <br>
+        <span style="margin-left: 1.4rem;">Opens diff in editor for human review before push, executes only after confirmation</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 18: Skills Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills — Machine-Readable Lab Handbook</h2>
+    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.4rem;">
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">01</span>
+        <div>
+          <div class="highlight">Markdown files, loaded into context on demand</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">Zero token cost when idle; injected with a single command when needed</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">02</span>
+        <div>
+          <div class="highlight">Encodes institutional knowledge that survives across sessions</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">Experiment workflows, paper formats, coding standards — never forgotten</div>
+        </div>
+      </div>
+      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
+        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">03</span>
+        <div>
+          <div class="highlight">"Your research playbook, directly consumable by the agent"</div>
+          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">From idea to paper, every stage has a corresponding skill</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills</p>
+</section>
+
+<!-- Slide 19: Research Skills Showcase -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Research-Relevant Skills</h2>
+    <div class="terminal-box" style="margin-top: 1.5rem;">
+      <table class="terminal-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="accent mono">fars-system</td>
+            <td>FARS fully autonomous research system architecture guide, understanding multi-agent research pipelines</td>
+          </tr>
+          <tr>
+            <td class="accent mono">fars-reviewer</td>
+            <td>Paper review agent logic, completeness audit pipeline and preprocessing</td>
+          </tr>
+          <tr>
+            <td class="accent mono">agent-exp-orchestration</td>
+            <td>Parallel experiment orchestration: job conflicts, rate limiting, subprocess isolation, retries</td>
+          </tr>
+          <tr>
+            <td class="accent mono">rope2sink</td>
+            <td>ICML paper writing — LaTeX editing and attention sink analysis</td>
+          </tr>
+          <tr>
+            <td class="accent mono">weekly-progress</td>
+            <td>Automated weekly report generation, structured experiment progress with file references</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Skills Extensibility -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Skills Extensibility</h2>
+    <ul class="bullet-list" style="margin-top: 2rem;">
+      <li>
+        <span class="accent mono">writing-skills</span>
+        <span> — Create new skills in a TDD style</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Write expected behaviors first, then iterate on skill content until tests pass</span>
+      </li>
+      <li>
+        <span class="accent mono">find-skills</span>
+        <span> — Discover and install skills from the open ecosystem</span>
+        <br>
+        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.85rem; padding: 0.5rem 1rem;">
+          <span class="dim">$</span> <span class="highlight">npx skills</span> <span class="dim"># browse the community skill directory</span>
+        </div>
+      </li>
+      <li>
+        <span class="highlight">"You can build your own research workflow skills"</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Any repetitive research process can be skill-ified — write once, reuse forever</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 21: Sub-agent Introduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent — Specialist with Independent Context</h2>
+    <ul class="bullet-list" style="margin-top: 1.5rem;">
+      <li>
+        <span class="highlight">Independent context window</span>
+        <span> + system prompt + tools</span>
+        <br>
+        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">Main context stays clean; heavy tasks complete in a disposable context</span>
+      </li>
+      <li>
+        <span>Built-in types:</span>
+        <div style="margin-top: 0.5rem; margin-left: 1.4rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Explore</span> <span class="dim">(Haiku, fast)</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Plan</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">General-purpose</span>
+          </span>
+          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
+            <span class="accent">Custom</span>
+          </span>
+        </div>
+      </li>
+      <li>
+        <span class="dim">⚠ Cannot spawn other subagents</span>
+        <span> — prevents infinite nesting and resource explosion</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 22: Subagent Delegation Pattern -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Subagent Delegation Pattern</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.88rem; line-height: 1.9;">
+      <div class="mono">
+<span class="highlight">Main Context</span> <span class="dim">(clean)</span>            <span class="accent">Subagent Context</span> <span class="dim">(disposable)</span>
+<span class="dim">────────────────────              ─────────────────────────────</span>
+User request                      Read skill.md (~60KB)
+  <span class="dim">|</span>                               Read experiment data
+Gather requirements <span class="dim">(~10 lines)</span>  Generate HTML <span class="dim">(~3000 lines)</span>
+  <span class="dim">|</span>                               Write files
+Spawn Agent tool <span class="accent">──────────────></span>
+  <span class="dim">|</span>                  <span class="accent"><──────────</span>  Return summary <span class="dim">(5 lines)</span>
+Report file path to user
+      </div>
+    </div>
+    <div class="big-quote" style="font-size: 1.05rem;">
+      "Heavy work done in a disposable context, results collected in a clean context"
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
+</section>
+
+<!-- Slide 23: Sub-agent Research Applications -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Sub-agent Research Scenarios</h2>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem;">
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Parallel Execution</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent 1: Read paper → extract methodology<br>
+          Agent 2: Search existing implementations → assess usability<br>
+          Agent 3: Check dataset availability → download plan
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Role-Based Review</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Fact checker:    Data &amp; citation accuracy<br>
+          Security expert: Code security + data privacy<br>
+          Senior engineer: Reproducibility + performance
+        </div>
+      </div>
+      <div class="terminal-box">
+        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Writer / Reviewer Pattern</div>
+        <div class="mono dim" style="font-size: 0.85rem;">
+          Agent A: Implement experiment code + generate slides<br>
+          Agent B: Independently audit correctness + reproducibility
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 24: Loop -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Loop — Continuous Autonomous Execution</h2>
+    <div class="terminal-box" style="margin: 1.5rem 0; text-align: center; padding: 1.2rem 2rem;">
+      <span class="mono" style="font-size: 1.3rem;">
+        <span class="dim">$</span>
+        <span class="highlight"> /loop </span>
+        <span class="accent">5m</span>
+        <span class="dim"> &lt;command&gt;</span>
+        <span class="cursor">█</span>
+      </span>
+    </div>
+    <ul class="bullet-list">
+      <li>
+        <span class="accent">Training monitoring</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 5m check GPU utilization and training loss</span>
+      </li>
+      <li>
+        <span class="accent">Experiment polling</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 10m check if experiment batch has completed</span>
+      </li>
+      <li>
+        <span class="accent">CI watching</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 3m check GitHub Actions status for latest push</span>
+      </li>
+      <li>
+        <span class="accent">Resource monitoring</span>
+        <span class="dim"> — </span>
+        <span class="mono dim" style="font-size: 0.85rem;">/loop 15m check disk space and memory usage on VPS</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/cli-reference (/loop)</p>
+</section>
+
+<!-- Slide 25: Full Pipeline -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Full Workflow: Hooks + Skills + Subagents</h2>
+    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.8rem; line-height: 2;">
+      <div class="mono">
+<span class="highlight">Trigger Layer (Hooks)</span>       <span class="accent">State Layer</span>             <span class="highlight">Execution Layer (Skills)</span>
+<span class="dim">┌──────────────────┐         ┌───────────────────┐         ┌──────────────────┐</span>
+<span class="dim">│</span> Stop hook        <span class="dim">│─read──→│</span> current_stage     <span class="dim">│─trigger─→│</span> block + hint     <span class="dim">│</span>
+<span class="dim">│</span> (session end)    <span class="dim">│</span>        <span class="dim">│</span> compact_pending   <span class="dim">│</span>          <span class="dim">│</span> next /skill      <span class="dim">│</span>
+<span class="dim">├──────────────────┤         │</span> last_skill_upd    <span class="dim">│         ├──────────────────┤</span>
+<span class="dim">│</span> PreCompact       <span class="dim">│─flag──→│</span> last_commit       <span class="dim">│</span>          <span class="dim">│</span> user runs        <span class="dim">│</span>
+<span class="dim">├──────────────────┤         └───────────────────┘         │</span> /skill-name      <span class="dim">│</span>
+<span class="dim">│</span> PostToolUse      <span class="dim">│─after Skill──────────────────────────→│</span> advance stage    <span class="dim">│</span>
+<span class="dim">└──────────────────┘                                       └──────────────────┘</span>
+      </div>
+    </div>
+    <div class="mono" style="text-align: center; font-size: 0.9rem;">
+      <span class="accent">dev</span>
+      <span class="dim"> → </span>
+      <span class="highlight">skill-update</span>
+      <span class="dim"> → </span>
+      <span class="accent">experiment</span>
+      <span class="dim"> → </span>
+      <span class="highlight">monitoring</span>
+      <span class="dim"> → </span>
+      <span class="accent">analysis</span>
+      <span class="dim"> → </span>
+      <span class="highlight">commit</span>
+      <span class="dim"> → </span>
+      <span class="accent">dev</span>
+      <span class="dim"> (cycle)</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 26: Before/After — Paper Reproduction -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: Paper Reproduction</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">IDE Assistant</div>
+        <ol class="bullet-list" style="list-style: decimal; padding-left: 1.2rem;">
+          <li>Read paper</li>
+          <li>Ask AI to explain</li>
+          <li>Manually paste code</li>
+          <li>Run → errors</li>
+          <li>Ask AI to fix</li>
+          <li>Repeat steps 4–5</li>
+          <li>Manually start training</li>
+          <li>Manually monitor progress</li>
+        </ol>
+        <div class="dim" style="margin-top: 0.8rem; font-size: 0.85rem;">8 steps, manual intervention throughout, context frequently lost</div>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Claude Code Agent</div>
+        <div class="terminal-box" style="margin-bottom: 0.8rem; padding: 0.6rem 1rem; font-size: 0.88rem;">
+          <span class="dim">$</span> <span class="highlight">Please reproduce the experiments from this paper</span>
+        </div>
+        <ul class="bullet-list">
+          <li><span class="accent">Autonomously</span> explores codebase + reads paper</li>
+          <li><span class="accent">Autonomously</span> implements model architecture</li>
+          <li><span class="accent">Autonomously</span> runs tests + debugs</li>
+          <li><span class="accent">Autonomously</span> starts training + Loop monitoring</li>
+          <li><span class="accent">Autonomously</span> generates slides + changelog</li>
+        </ul>
+        <div class="highlight" style="margin-top: 0.8rem; font-size: 0.85rem;">1 prompt → fully autonomous execution</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 27: Before/After — Experiment Lifecycle -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Before / After: Experiment Lifecycle</h2>
+    <div class="comparison-grid" style="margin-top: 1.5rem;">
+      <div class="comparison-col bad">
+        <div class="col-label">Traditional Workflow</div>
+        <ul class="bullet-list">
+          <li>Manually tracking experiment state<br><span class="dim" style="font-size: 0.82rem;">Spreadsheets/notes, easy to miss things</span></li>
+          <li>Context lost after session ends<br><span class="dim" style="font-size: 0.82rem;">Must re-explain background next time</span></li>
+          <li>No automatic reminder for next step<br><span class="dim" style="font-size: 0.82rem;">Memory-dependent, critical steps easily forgotten</span></li>
+          <li>Results scattered everywhere<br><span class="dim" style="font-size: 0.82rem;">slides / logs / notes in different places</span></li>
+        </ul>
+      </div>
+      <div class="comparison-col good">
+        <div class="col-label">Pipeline + Hooks Workflow</div>
+        <ul class="bullet-list">
+          <li><span class="accent">Pipeline hooks</span> auto-track stages<br><span class="dim" style="font-size: 0.82rem;">state.json persisted, queryable anytime</span></li>
+          <li><span class="accent">Memory</span> retains knowledge across sessions<br><span class="dim" style="font-size: 0.82rem;">CLAUDE.md + skills never forgotten</span></li>
+          <li><span class="accent">Stop hook</span> auto-reminds next step<br><span class="dim" style="font-size: 0.82rem;">Deterministic execution, no memory dependency</span></li>
+          <li><span class="accent">Auto-generates</span> slides + changelog<br><span class="dim" style="font-size: 0.82rem;">Output ready when experiment ends, unified archive</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

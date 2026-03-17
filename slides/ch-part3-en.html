@@ -1,0 +1,281 @@
+<!-- Part 3: Documentation & Management (Slides 28-35) -->
+
+<!-- Slide 28: Part 3 Section Title -->
+<section class="slide section-title-slide" data-slide="28">
+  <div class="slide-content">
+    <div class="section-number reveal">Part 3</div>
+    <h1 class="reveal">Documentation &amp; Management Tips</h1>
+    <p class="accent reveal" style="font-size: 1.4rem; margin-top: 1rem;">
+      Engineer your Harness, not just your Prompt
+    </p>
+  </div>
+</section>
+
+<!-- Slide 29: Harness Engineering -->
+<section class="slide" data-slide="29">
+  <div class="slide-content">
+    <h2 class="reveal">The Core Philosophy of Harness Engineering</h2>
+    <div class="big-quote reveal">
+      "In Cursor, you engineer Prompts. In Claude Code, you engineer the Harness."
+    </div>
+    <ul class="bullet-list reveal" style="margin-top: 2rem;">
+      <li>
+        <span class="accent mono">Harness</span>
+        <span class="dim"> = </span>
+        <span class="highlight">CLAUDE.md</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Hooks</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Skills</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Subagents</span>
+        <span class="dim"> + </span>
+        <span class="highlight">Pipeline</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 30: Three Papers -->
+<section class="slide" data-slide="30">
+  <div class="slide-content">
+    <h2 class="reveal">Three Foundational Harness Engineering Articles</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; margin-top: 1.5rem;">
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">OpenAI</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Systems production engineering</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Repository knowledge</li>
+          <li><span class="dim">›</span> Agent legibility</li>
+          <li><span class="dim">›</span> Architectural boundaries</li>
+        </ul>
+      </div>
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">Anthropic</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Long-running agent framework</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Task segmentation</li>
+          <li><span class="dim">›</span> State persistence</li>
+          <li><span class="dim">›</span> Error recovery / self-check</li>
+        </ul>
+      </div>
+      <div class="terminal-box reveal">
+        <div style="color: var(--accent); font-weight: bold; margin-bottom: 0.6rem; font-size: 1rem;">Manus</div>
+        <div style="font-size: 0.75rem; color: var(--dim); margin-bottom: 0.8rem;">Working memory management</div>
+        <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.78rem; line-height: 1.8;">
+          <li><span class="dim">›</span> Information density</li>
+          <li><span class="dim">›</span> Relevance</li>
+          <li><span class="dim">›</span> Recency</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.82rem;" class="reveal">
+      <span class="dim">OpenAI focuses on systems engineering &nbsp;/&nbsp; Anthropic on runtime frameworks &nbsp;/&nbsp; Manus on context management</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Sources: openai.com/index/harness-engineering &middot; anthropic.com/engineering/effective-harnesses-for-long-running-agents &middot; manus.im/blog/context-engineering</p>
+</section>
+
+<!-- Slide 31: CLAUDE.md Best Practices -->
+<section class="slide" data-slide="31">
+  <div class="slide-content">
+    <h2 class="reveal">CLAUDE.md Best Practices</h2>
+    <div class="comparison-grid reveal" style="margin-top: 1.5rem;">
+      <div class="comparison-col">
+        <div style="color: #4ade80; font-weight: bold; font-size: 1rem; margin-bottom: 1rem; text-align: center;">
+          DO <span class="mono" style="font-size: 0.8rem;">include</span>
+        </div>
+        <ul class="bullet-list">
+          <li>Build commands <span class="mono dim">(build / test / lint)</span></li>
+          <li>Code style preferences <span class="mono dim">(const/let, types)</span></li>
+          <li>Testing guidelines <span class="mono dim">(framework, coverage requirements)</span></li>
+          <li>Architectural decisions <span class="mono dim">(directory structure, layering rules)</span></li>
+        </ul>
+      </div>
+      <div class="comparison-col">
+        <div style="color: #f87171; font-weight: bold; font-size: 1rem; margin-bottom: 1rem; text-align: center;">
+          DON'T <span class="mono" style="font-size: 0.8rem;">include</span>
+        </div>
+        <ul class="bullet-list">
+          <li>Things Claude can infer on its own</li>
+          <li>Standard industry conventions <span class="mono dim">(universally known)</span></li>
+          <li>Detailed API docs <span class="mono dim">(use Skills instead)</span></li>
+          <li>Frequently changing configs <span class="mono dim">(go stale quickly)</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="terminal-box reveal" style="margin-top: 1.5rem; font-size: 0.82rem; text-align: center; padding: 0.8rem 1.2rem;">
+      <span class="accent mono">Hooks</span>
+      <span class="dim"> &gt; </span>
+      <span class="mono">CLAUDE.md</span>
+      <span class="dim"> (100% enforced, cannot be bypassed) &nbsp;&nbsp;|&nbsp;&nbsp; </span>
+      <span class="accent mono">Skills</span>
+      <span class="dim"> &gt; </span>
+      <span class="mono">CLAUDE.md</span>
+      <span class="dim"> (occasional knowledge, loaded on demand)</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>
+
+<!-- Slide 32: 9 Principles -->
+<section class="slide" data-slide="32">
+  <div class="slide-content">
+    <h2 class="reveal">9 Coding Agent Principles</h2>
+    <div class="feature-grid reveal" style="grid-template-columns: repeat(3, 1fr); margin-top: 1.2rem; gap: 0.8rem;">
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Less is More</div>
+        <div class="dim" style="font-size: 0.75rem;">Skip the plugins — basic CLI is enough</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Context is Everything</div>
+        <div class="dim" style="font-size: 0.75rem;">Separate research and implementation phases, precise instructions</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Use Sycophancy</div>
+        <div class="dim" style="font-size: 0.75rem;">Use neutral prompts to prevent agent hallucination</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Avoid Fill-in-the-Blank</div>
+        <div class="dim" style="font-size: 0.75rem;">Set rules in CLAUDE.md to prevent wild guessing</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Define the Finish Line</div>
+        <div class="dim" style="font-size: 0.75rem;">Test-driven / CONTRACT.md acceptance criteria</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">CLAUDE.md as Logic Index</div>
+        <div class="dim" style="font-size: 0.75rem;">Write IF-ELSE tree pointing to rule files, not an encyclopedia</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Rules vs Skills</div>
+        <div class="dim" style="font-size: 0.75rem;">Rules = preferences; Skills = execution recipes</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Regular Cleanup</div>
+        <div class="dim" style="font-size: 0.75rem;">Let the agent self-organize, removing conflicting rules</div>
+      </div>
+      <div class="feature-card">
+        <div class="accent" style="font-weight: bold; margin-bottom: 0.3rem;">Don't Chase New Tools</div>
+        <div class="dim" style="font-size: 0.75rem;">Official integrations are what actually matter</div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @systematicls on X — "Coding Agent Best Practices"</p>
+</section>
+
+<!-- Slide 33: Boris Tips 1-5 -->
+<section class="slide" data-slide="33">
+  <div class="slide-content">
+    <h2 class="reveal">Boris Cherny 10 Tips <span class="dim">(1–5)</span></h2>
+    <ul class="bullet-list reveal" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">1.</span>
+        <strong> git worktree for parallel sessions</strong>
+        <span class="dim"> — Run multiple Claude instances simultaneously without interference</span>
+      </li>
+      <li>
+        <span class="accent mono">2.</span>
+        <strong> Plan Mode before implementing</strong>
+        <span class="dim"> — One Claude writes the plan, another Claude audits it</span>
+      </li>
+      <li>
+        <span class="accent mono">3.</span>
+        <strong> Update CLAUDE.md after every correction</strong>
+        <span class="dim"> — Write the rule in, prevent the same class of error from recurring</span>
+      </li>
+      <li>
+        <span class="accent mono">4.</span>
+        <strong> Turn daily operations into Skills</strong>
+        <span class="dim"> — Any operation used &gt;1x per day becomes a custom slash command</span>
+      </li>
+      <li>
+        <span class="accent mono">5.</span>
+        <strong> Slack MCP lets Claude fix bugs independently</strong>
+        <span class="dim"> — Paste bug thread, let Claude autonomously inspect CI logs</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @bcherny (Boris Cherny) Twitter thread, 2026-01-31</p>
+</section>
+
+<!-- Slide 34: Boris Tips 6-10 -->
+<section class="slide" data-slide="34">
+  <div class="slide-content">
+    <h2 class="reveal">Boris Cherny 10 Tips <span class="dim">(6–10)</span></h2>
+    <ul class="bullet-list reveal" style="margin-top: 1.5rem;">
+      <li>
+        <span class="accent mono">6.</span>
+        <strong> Claude as reviewer to challenge code</strong>
+        <span class="dim"> — Have Claude play the reviewer, demand a more elegant rewrite</span>
+      </li>
+      <li>
+        <span class="accent mono">7.</span>
+        <strong> Ghostty terminal + voice input</strong>
+        <span class="dim"> — Better rendering + voice input makes prompts more detailed</span>
+      </li>
+      <li>
+        <span class="accent mono">8.</span>
+        <strong> <span class="mono highlight">"use subagents"</span> to invest more compute</strong>
+        <span class="dim"> — Append the keyword, keep main context clean</span>
+      </li>
+      <li>
+        <span class="accent mono">9.</span>
+        <strong> Use BigQuery and other CLIs directly for analysis</strong>
+        <span class="dim"> — No hand-written SQL needed; Claude operates databases for real-time analysis</span>
+      </li>
+      <li>
+        <span class="accent mono">10.</span>
+        <strong> Generate HTML presentations to learn code</strong>
+        <span class="dim"> — Have Claude generate visual explanations, ASCII architecture diagrams for comprehension</span>
+      </li>
+    </ul>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @bcherny (Boris Cherny) Twitter thread, 2026-01-31</p>
+</section>
+
+<!-- Slide 35: Failure Patterns -->
+<section class="slide" data-slide="35">
+  <div class="slide-content">
+    <h2 class="reveal">Common Failure Patterns</h2>
+    <div class="terminal-table reveal" style="margin-top: 1.2rem;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--accent);">
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: var(--accent); font-weight: bold; width: 22%;">Failure Pattern</th>
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: var(--dim); width: 38%;">Problem</th>
+            <th style="text-align: left; padding: 0.5rem 0.8rem; color: #4ade80; width: 40%;">Solution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Kitchen Sink Session</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Mixing unrelated tasks into the same session, polluting context</td>
+            <td style="padding: 0.55rem 0.8rem;">Run <span class="mono accent">/clear</span> before switching tasks</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Repeated Corrections</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Failed attempts pile up, context filled with error history</td>
+            <td style="padding: 0.55rem 0.8rem;">After 2 corrections, run <span class="mono accent">/clear</span> and give a fresh context</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">CLAUDE.md Too Long</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Too much content gets ignored, conflicting rules can't be enforced</td>
+            <td style="padding: 0.55rem 0.8rem;">Ruthlessly trim, switch to IF-ELSE logic index + Skills</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Trust-Verification Gap</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Edge cases not covered, agent quietly goes off the rails</td>
+            <td style="padding: 0.55rem 0.8rem;">Always provide verifiable completion criteria <span class="mono dim">(CONTRACT.md)</span></td>
+          </tr>
+          <tr>
+            <td style="padding: 0.55rem 0.8rem; color: var(--highlight); font-weight: bold;">Infinite Exploration</td>
+            <td style="padding: 0.55rem 0.8rem; color: var(--dim);">Still exploring aimlessly as context nears exhaustion</td>
+            <td style="padding: 0.55rem 0.8rem;">Narrow task scope, or isolate exploration with a <span class="mono accent">subagent</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>

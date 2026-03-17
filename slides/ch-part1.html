@@ -1,0 +1,409 @@
+<!-- Slide 4: Part 1 Section Title -->
+<section class="slide section-title-slide">
+  <div class="slide-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:1.5rem;">
+    <div class="section-number mono dim">Part 1</div>
+    <h1 style="font-size:3.2rem;font-weight:700;line-height:1.2;">
+      核心设计与范式
+    </h1>
+    <p class="dim" style="font-size:1.4rem;letter-spacing:0.05em;">
+      理解 <span class="accent">Agent</span> 的本质区别
+    </p>
+    <div class="mono dim" style="margin-top:2rem;font-size:0.9rem;letter-spacing:0.15em;">
+      <span class="cursor">█</span>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Assistant vs Agent Comparison Table -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>传统助手 <span class="dim">vs</span> <span class="accent">Claude Code (Agent)</span></h2>
+    <div class="terminal-box" style="margin-top:1.5rem;padding:0;">
+      <table class="terminal-table" style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th class="mono" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;color:#666;font-size:0.85rem;letter-spacing:0.1em;">维度</th>
+            <th class="mono" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;color:#888;font-size:0.85rem;letter-spacing:0.1em;">传统聊天助手</th>
+            <th class="mono accent" style="padding:0.75rem 1.2rem;text-align:left;border-bottom:1px solid #333;font-size:0.85rem;letter-spacing:0.1em;">Claude Code (Agent)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">工作模式</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">回答问题，然后等待</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">自主工作，持续执行</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">能力范围</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">仅文本回复</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">执行操作：编辑、搜索、运行、部署</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">上下文</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">只看当前单文件</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">跨项目、跨文件全局理解</td>
+          </tr>
+          <tr style="border-bottom:1px solid #222;">
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">使用方式</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">你写代码，AI 审查</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">你描述目标，AI 规划并实现</td>
+          </tr>
+          <tr>
+            <td class="mono dim" style="padding:0.85rem 1.2rem;font-size:0.9rem;white-space:nowrap;">反馈循环</td>
+            <td style="padding:0.85rem 1.2rem;color:#888;font-size:0.95rem;">依赖用户判断</td>
+            <td class="accent" style="padding:0.85rem 1.2rem;font-size:0.95rem;">自我验证：运行测试、对比输出</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mono dim" style="margin-top:1.2rem;font-size:0.85rem;text-align:right;">
+      核心原则：<span class="highlight">"Delegate, don't dictate"</span>
+    </p>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/best-practices</p>
+</section>
+
+<!-- Slide 6: Agentic Loop (ReAct) -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Agentic Loop <span class="dim">(ReAct 范式)</span></h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;align-items:start;">
+      <div class="terminal-box diagram">
+        <div class="mono" style="font-size:0.95rem;line-height:1.9;color:#ccc;">
+          <div style="color:#666;margin-bottom:0.5rem;">┌─────────────────────────┐</div>
+          <div>│  <span class="accent" style="font-weight:700;">1. 收集上下文</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  搜索文件，理解结构&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div>│  <span class="highlight" style="font-weight:700;">2. 采取行动</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  编辑文件，执行命令&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div>│  <span style="color:#88aaff;font-weight:700;">3. 验证结果</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│  运行测试，确认正确性&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">│&nbsp;&nbsp;&nbsp;&nbsp;<span class="accent">↩ loop back</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│</div>
+          <div style="color:#666;">└─────────────────────────┘</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem;justify-content:center;">
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono accent" style="font-size:0.85rem;margin-bottom:0.4rem;">KEY INSIGHT</p>
+          <p style="font-size:1.1rem;line-height:1.5;">
+            <span class="highlight">非线性</span> — 迭代式自我纠正
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.6rem;">每一轮工具调用的结果</p>
+          <p style="font-size:0.95rem;color:#ccc;line-height:1.5;">都会反馈回循环，<br>指导下一步决策</p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.6rem;">用户始终在循环中</p>
+          <p style="font-size:0.95rem;color:#ccc;line-height:1.5;">可随时中断并重定向</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/how-claude-code-works</p>
+</section>
+
+<!-- Slide 7: Why ReAct for Research -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>为什么 ReAct 对 <span class="accent">AI Research</span> 至关重要</h2>
+    <ul class="bullet-list" style="margin-top:1.8rem;display:flex;flex-direction:column;gap:1.2rem;">
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">多步实验自动化</span>
+          <span class="mono dim" style="font-size:0.9rem;margin-left:0.8rem;">data → run → analyze → iterate</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">每一步结果自动触发下一步，无需手动转接</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">自主探索代码库</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">理解陌生的论文实现，自动追踪调用链与依赖</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">自导向调试</span>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.3rem;">发现 bug → 形成假设 → 验证 → 修复 → 确认，闭环完成</p>
+        </div>
+      </li>
+      <li style="display:flex;align-items:flex-start;gap:1rem;">
+        <span class="accent mono" style="font-size:1.2rem;flex-shrink:0;">→</span>
+        <div>
+          <span class="highlight" style="font-size:1.05rem;">核心原则</span>
+          <div class="terminal-box" style="display:inline-block;padding:0.4rem 1rem;margin-top:0.4rem;">
+            <span class="mono accent" style="font-size:1rem;letter-spacing:0.05em;">"Delegate, don't dictate"</span>
+          </div>
+          <p style="color:#888;font-size:0.9rem;margin-top:0.4rem;">给出目标与上下文，让 Claude 决定执行步骤</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Slide 8: System Architecture -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>系统架构</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;">
+      <!-- Two Pillars -->
+      <div>
+        <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.12em;margin-bottom:0.8rem;">TWO PILLARS</p>
+        <div style="display:flex;flex-direction:column;gap:0.8rem;">
+          <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+            <p class="accent mono" style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Models</p>
+            <p style="color:#aaa;font-size:0.9rem;">推理与理解</p>
+            <p class="mono dim" style="font-size:0.8rem;margin-top:0.4rem;">reasoning · code understanding · planning</p>
+          </div>
+          <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+            <p class="highlight mono" style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Tools</p>
+            <p style="color:#aaa;font-size:0.9rem;">动作执行</p>
+            <p class="mono dim" style="font-size:0.8rem;margin-top:0.4rem;">28+ built-in · MCP · Skills · Hooks</p>
+          </div>
+        </div>
+      </div>
+      <!-- Three Environments -->
+      <div>
+        <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.12em;margin-bottom:0.8rem;">THREE ENVIRONMENTS</p>
+        <div class="feature-grid" style="display:flex;flex-direction:column;gap:0.8rem;">
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">本地 <span class="dim">(Local)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">运行于你的机器，完整文件与工具访问权</p>
+          </div>
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">云端 <span class="dim">(Cloud)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">Anthropic 托管 VM，任务卸载与远程工作</p>
+          </div>
+          <div class="feature-card terminal-box" style="padding:1rem 1.2rem;">
+            <p class="mono accent" style="font-size:0.85rem;font-weight:700;">远程控制 <span class="dim">(Remote Control)</span></p>
+            <p style="color:#888;font-size:0.85rem;margin-top:0.3rem;">浏览器 Web UI + 本地执行，灵活混合</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="terminal-box" style="margin-top:1.2rem;padding:0.7rem 1.2rem;text-align:center;">
+      <span class="mono dim" style="font-size:0.85rem;">Claude Code = </span>
+      <span class="mono highlight" style="font-size:0.9rem;">Agentic Harness</span>
+      <span class="mono dim" style="font-size:0.85rem;"> built around Claude LLM</span>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/overview</p>
+</section>
+
+<!-- Slide 9: Tool System -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>工具系统 <span class="dim">—</span> <span class="accent">28+</span> 内置工具</h2>
+    <div class="feature-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.8rem;margin-top:1.4rem;">
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">文件操作</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Read</div>
+          <div class="highlight">Edit</div>
+          <div class="highlight">Write</div>
+          <div style="color:#666;">NotebookEdit</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">搜索</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Glob</div>
+          <div class="highlight">Grep</div>
+          <div style="color:#666;">pattern match</div>
+          <div style="color:#666;">regex search</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">执行</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">Bash</div>
+          <div style="color:#666;">shell commands</div>
+          <div style="color:#666;">tests · git</div>
+          <div style="color:#666;">scripts</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">Web</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">WebFetch</div>
+          <div style="color:#666;">WebSearch</div>
+          <div style="color:#666;">fetch docs</div>
+          <div style="color:#666;">web search</div>
+        </div>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1rem 0.9rem;">
+        <p class="accent mono" style="font-size:0.85rem;font-weight:700;margin-bottom:0.6rem;">代码智能</p>
+        <div class="mono" style="font-size:0.8rem;color:#aaa;line-height:1.7;">
+          <div class="highlight">LSP</div>
+          <div style="color:#666;">type errors</div>
+          <div style="color:#666;">goto def</div>
+          <div style="color:#666;">find refs</div>
+        </div>
+      </div>
+    </div>
+    <div class="terminal-box" style="margin-top:1rem;padding:0.8rem 1.2rem;">
+      <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.1em;margin-bottom:0.5rem;">ORCHESTRATION TOOLS</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">Agent</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">Skill</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskCreate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskList</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">TaskUpdate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">CronCreate</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">AskUserQuestion</span>
+        <span class="mono highlight" style="font-size:0.85rem;background:rgba(100,200,100,0.08);padding:0.2rem 0.6rem;border:1px solid #333;">EnterPlanMode</span>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/features-overview</p>
+</section>
+
+<!-- Slide 10: Extension Mechanisms -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>四大扩展机制</h2>
+    <div class="feature-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem;margin-top:1.8rem;">
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Skills</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">on-demand</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">按需加载的领域知识</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">Markdown 文件 → 复用的工作流与机构知识</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">MCP</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">protocol</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">连接外部服务</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">Model Context Protocol → Notion, Jira, Slack, DB...</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Hooks</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">automation</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">工具执行前后自动脚本</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">PreToolUse · PostToolUse · Stop · PreCompact</p>
+      </div>
+      <div class="feature-card terminal-box" style="padding:1.5rem 1.6rem;">
+        <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;">
+          <span class="mono accent" style="font-size:1.3rem;font-weight:700;">Subagents</span>
+          <span class="mono dim" style="font-size:0.8rem;padding:0.15rem 0.5rem;border:1px solid #333;">parallel</span>
+        </div>
+        <p style="color:#aaa;font-size:0.95rem;line-height:1.5;">独立上下文专门化 Agent</p>
+        <p class="mono dim" style="font-size:0.8rem;margin-top:0.5rem;">独立 context window · system prompt · tools</p>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills, /hooks, /sub-agents, /mcp</p>
+</section>
+
+<!-- Slide 11: Context Window -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>Context Window <span class="dim">—</span> 最关键的资源</h2>
+    <div class="big-quote terminal-box" style="margin:1.5rem 0;padding:1.5rem 2rem;text-align:center;border-color:#444;">
+      <p style="font-size:1.5rem;line-height:1.4;color:#eee;">
+        "你最重要的资源是<span class="accent">上下文</span>，<br>不是<span class="dim">算力</span>"
+      </p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
+      <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+        <p class="mono accent" style="font-size:0.85rem;letter-spacing:0.1em;margin-bottom:0.8rem;">CONTEXT CONTAINS</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> 对话历史
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> 文件内容
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> 命令输出
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> <span class="highlight">CLAUDE.md</span> 指令
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> 加载的 <span class="highlight">Skills</span>
+          </li>
+          <li class="mono" style="font-size:0.9rem;color:#ccc;display:flex;align-items:center;gap:0.6rem;">
+            <span class="accent">▸</span> 系统提示 (System Prompt)
+          </li>
+        </ul>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1rem 1.2rem;flex:1;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.4rem;">WHY IT MATTERS</p>
+          <p style="color:#aaa;font-size:0.9rem;line-height:1.5;">上下文耗尽 = 任务失去记忆<br>主动管理上下文 = 持续工作能力</p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;flex:1;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.4rem;">PERSISTENT MEMORY</p>
+          <p style="color:#aaa;font-size:0.9rem;line-height:1.5;"><span class="highlight">CLAUDE.md</span> 每次会话自动加载<br><span class="highlight">Auto Memory</span> Claude 自动保存笔记</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/memory</p>
+</section>
+
+<!-- Slide 12: Context Management Strategies -->
+<section class="slide">
+  <div class="slide-content">
+    <h2>上下文管理<span class="accent">三层</span>策略</h2>
+    <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.5rem;">
+      <!-- Level 1 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #4a9;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#4a9;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 1&nbsp;&nbsp;基础</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/clear</span>
+          <span class="mono dim" style="font-size:0.85rem;">任务切换时完全重置</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/compact</span>
+          <span class="mono dim" style="font-size:0.85rem;">手动压缩，可指定保留焦点</span>
+        </div>
+      </div>
+      <!-- Level 2 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #a84;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#a84;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 2&nbsp;&nbsp;中级</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">CLAUDE.md &lt;200 行</span>
+          <span class="mono dim" style="font-size:0.85rem;">精简项目指令，避免超载</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Auto Memory</span>
+          <span class="mono dim" style="font-size:0.85rem;">跨 session 持久化笔记</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">/btw</span>
+          <span class="mono dim" style="font-size:0.85rem;">侧边快问，不写入历史</span>
+        </div>
+      </div>
+      <!-- Level 3 -->
+      <div class="terminal-box" style="padding:1.1rem 1.4rem;border-left:3px solid #48a;position:relative;">
+        <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.6rem;">
+          <span class="mono" style="color:#48a;font-size:0.85rem;font-weight:700;letter-spacing:0.1em;">LEVEL 3&nbsp;&nbsp;高级</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.8rem;align-items:center;">
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Subagent delegation</span>
+          <span class="mono dim" style="font-size:0.85rem;">重型任务外包到独立上下文</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Skills lazy-load</span>
+          <span class="mono dim" style="font-size:0.85rem;">按需加载，不占常驻空间</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Pipeline state</span>
+          <span class="mono dim" style="font-size:0.85rem;">JSON 状态持久化阶段信息</span>
+          <span class="mono highlight" style="font-size:0.9rem;background:rgba(100,200,100,0.06);padding:0.25rem 0.8rem;border:1px solid #333;">Multi-session</span>
+          <span class="mono dim" style="font-size:0.85rem;">跨会话拆分长任务</span>
+        </div>
+      </div>
+    </div>
+    <p class="mono dim" style="margin-top:1rem;font-size:0.82rem;text-align:right;">
+      核心原则：<span class="highlight">主动管理上下文 = 持续的高质量输出</span>
+    </p>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/memory, /best-practices</p>
+</section>

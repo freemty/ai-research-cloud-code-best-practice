@@ -1,0 +1,16 @@
+experiment:
+  name: "rope-frequency-ablation"
+  seed: 42
+  epochs: 10
+
+model:
+  architecture: "transformer"
+  hidden_dim: 768
+  num_heads: 12
+  num_layers: 6
+
+training:
+  batch_size: 32
+  learning_rate: 0.001
+  scheduler: "cosine"
+  warmup_steps: 500
