@@ -77,12 +77,15 @@ Compacted summaries            state.json (pipeline state)
 | Everything-Claude-Code | Task | — | Learning task |
 | OpenClaw最佳实践 → Claude Code & Codex 最佳实践 | Notes | 已完成 | Merged into main page |
 
-### Links to Extract (pending agent results)
-- [ ] All bookmarked URLs from "Claude Code & Codex 最佳实践"
-- [ ] All bookmarked URLs from "Claude code 最佳实践"
-- [ ] All bookmarked URLs from "Coding Agent Best Practices"
-- [ ] Boris Cherny Twitter/X references
-- [ ] Community blog posts and tutorials
+### Links Extracted ✅
+- [x] All bookmarked URLs from "Claude Code & Codex 最佳实践" → ref-04 sections 1-5
+- [x] All bookmarked URLs from "Claude code 最佳实践" → ref-04 sections 1-5
+- [x] All bookmarked URLs from "Coding Agent Best Practices" → ref-04 section 3
+- [x] Boris Cherny Twitter/X references → ref-04 section 1
+- [x] Tw93 六层架构 → ref-04 section 2b
+- [x] AReaL 案例 → ref-04 section 5 (AReaL Case Study)
+- [x] Thariq Skills 九大分类 → ref-04 section 6
+- [x] Community blog posts and tutorials → ref-04 section 5
 
 ---
 
@@ -100,9 +103,15 @@ Compacted summaries            state.json (pipeline state)
 ### GitHub
 - `github.com/anthropics/claude-code` (78.1k stars) — Official repo
 
-### Community (to be populated from Notion)
-- Boris Cherny Twitter tips — [links pending]
-- Other community best practices — [links pending]
+### Community
+- Boris Cherny (@bcherny) 10 Tips — ref-04 section 1
+- Tw93 (@HiTw93) 六层架构深度解析 — ref-04 section 2b
+- @systematicls Coding Agent 9 Principles — ref-04 section 3
+- Thariq Shihipar (@trq212) Skills 九大分类 — ref-04 section 6
+- AReaL: 32天零手打代码构建分布式 RL 框架 — ref-04 section 5
+- Superpowers: 完整软件开发工作流 plugin — ref-04 section 5
+- Learn Claude Code (@baicai003): 12节课从零搭 AI Coding Agent — https://github.com/anthropics/courses
+- 胡渊鸣: 如何有效地给 10 个 Claude Code 打工 — ref-04 section 7
 
 ---
 

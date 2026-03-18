@@ -243,6 +243,17 @@ Source: Notion page "Coding Agent Best Practices" (@systematicls on X)
 | Jina AI Reader | Use `https://r.jina.ai/<URL>` to extract any webpage content |
 | Haiku MCP limitation | Haiku doesn't support MCP tool search; switch to `claude --model sonnet` |
 
+### AReaL Case Study (Vibe Coding 32天零手打代码)
+Source: 知乎 https://zhuanlan.zhihu.com/p/2003269671630165191
+GitHub: https://github.com/inclusionAI/AReaL
+
+- 32天、178 session、72万行净增、零手打代码 — 用 Claude Code 从零构建分布式 RL 框架
+- 分层配置架构：CLAUDE.md 精简入口 + rules/ + agents/ + skills/ + commands/
+- Read 25,000次 >> Edit 14,000次 — agent 核心价值在于理解和导航，不是生成
+- Evidence-driven：先设计验证方案再写代码，测试是你和 AI 之间的合同
+- `/pr-review` 动态专家团队：根据 PR 内容自动组装专家团队，按风险分级分配不同模型并行审查
+- Skill 升级为 Agent：不给 Write/Edit 权限，只做只读顾问 — 权限隔离原则
+
 ### Chinese Community Resources
 - B站: Claude Code 使用技巧
 - B站: Claude Code Skills 教程
@@ -256,5 +267,83 @@ Source: Notion page "Coding Agent Best Practices" (@systematicls on X)
 
 ---
 
-## 6. Completed Demos
+## 6. Thariq Shihipar — Lessons from Building Claude Code: How We Use Skills
+
+Source: @trq212 (Anthropic Claude Code 团队工程师, Skills 功能核心推动者)
+X Article: https://x.com/dotey/status/2034002188994060691
+宝玉翻译版, 原文: @trq212 2026-03-17
+
+### Skills 九大分类 (Anthropic 内部几百个活跃 Skills 中提炼)
+
+| # | 类别 | 说明 | 示例 |
+|---|------|------|------|
+| 1 | 库与 API 参考 | 正确使用某库/SDK，含踩坑点 | billing-lib, internal-platform-cli, frontend-design |
+| 2 | 产品验证 | 搭配 Playwright/tmux 验证代码是否正常 | signup-flow-driver, checkout-verifier |
+| 3 | 数据获取与分析 | 连接数据/监控体系 | funnel-query, cohort-compare, grafana |
+| 4 | 业务流程与团队自动化 | 重复工作流自动化为一条命令 | standup-post, create-ticket, weekly-recap |
+| 5 | 代码脚手架与模板 | 生成特定功能的框架样板代码 | new-workflow, new-migration, create-app |
+| 6 | 代码质量与审查 | 执行代码质量标准，可作为 hook/GitHub Action | adversarial-review, code-style, testing-practices |
+| 7 | CI/CD 与部署 | 拉取、推送、部署 | babysit-pr, deploy-service, cherry-pick-prod |
+| 8 | 运维手册 | 现象→多工具排查→结构化报告 | service-debugging, oncall-runner, log-correlator |
+| 9 | 基础设施运维 | 日常维护，含破坏性操作安全护栏 | orphans-cleanup, dependency-management, cost-investigation |
+
+### 核心写 Skill 技巧
+
+- **不要说显而易见的事** — Claude 对代码库已经很了解，重点放在能打破 Claude 常规思维的信息上
+- **建踩坑点(gotchas)章节** — Skill 中信息量最大的部分，根据常见失败点持续积累
+- **利用文件系统与渐进式披露** — Skill 是文件夹不只是 markdown，用 references/、assets/、scripts/ 子目录按需加载
+- **不要限制太死** — 给信息但留灵活性，避免指令过于具体
+- **考虑初始设置** — 用 config.json 存用户配置，未设置时自动询问
+- **description 写「何时触发」而非「做什么」** — Claude 通过 description 判断该不该调用
+- **记忆与数据存储** — 用 log/JSON/SQLite 存历史数据，使用 ${CLAUDE_PLUGIN_DATA} 稳定目录
+- **存脚本与生成代码** — 给 Claude 代码库让它专注编排，而非重造样板
+- **按需钩子(On Demand Hooks)** — Skills 可注册只在调用时激活的 hook（如 /careful 拦截危险操作, /freeze 限制编辑范围）
+
+### 分发与管理
+
+- 小团队: 提交到 `./.claude/skills`
+- 大规模: 内部插件市场 (Plugin Marketplace)
+- 自然涌现: 沙盒 → Slack 推荐 → 获得关注 → PR 到市场
+- 效果衡量: PreToolUse hook 记录 Skill 使用频率
+- 组合 Skills: 直接按名字引用其他 Skills，已安装即可调用
+
+---
+
+## 7. 胡渊鸣 — 如何有效地给 10 个 Claude Code 打工
+
+Source: 胡渊鸣 (Meshy AI CEO, 清华姚班 → MIT PhD)
+URL: https://zhuanlan.zhihu.com/p/2007147036185744607
+Date: 2026-03-10
+
+### 核心主题
+从单线程 Cursor Agent 到多实例并行 Claude Code 的基建演进路线，10 个阶段逐步提高 Agentic Coding 吞吐量。
+
+### 10 个阶段摘要
+
+| # | 阶段 | 关键点 |
+|---|------|--------|
+| 1 | Cursor → Claude Code | 去掉 GUI 依赖，iPhone SSH 随时派活，可编码时间 8h → 24h |
+| 2 | Container + `--dangerously-skip-permissions` | EC2 隔离环境，全权限开放，单 prompt 连续跑 5 分钟 |
+| 3 | Ralph Loop | 任务队列 + 自动重启：CC 干完一个活自动拉下一个，列表不空就不停 |
+| 4 | Git Worktree 并行 | 同 repo 开 5 个 worktree，每个跑独立 CC，实现 1 分钟 1 commit |
+| 5 | CLAUDE.md + PROGRESS.md | CLAUDE.md = 项目规则；PROGRESS.md = 经验教训沉淀，"同样的错误下次不要再犯" |
+| 6 | Web Manager 取代 SSH | `claude -p` 非交互模式 + Python subprocess 调度 → 手机端网页操控 |
+| 7 | CC 管 CC | `--output-format stream-json --verbose` 让 manager CC 读取 worker JSON log，诊断调优，成功率 20% → 95% |
+| 8 | 语音输入 | 各输入框加语音识别 API，走路/开车/吃饭时也能派活 |
+| 9 | Plan Mode 封装 | 在 web manager 中封装 Plan Mode，批量 kick off + 统一 review |
+| 10 | 不看代码 | "Context, not control" — 只写 CLAUDE.md，不 review 实现代码，专注提问质量和目标定义 |
+
+### 我们 playbook 可借鉴的点
+
+**已覆盖：** CLAUDE.md、Plan Mode、Git Worktree（Boris Tip #1）、Subagent
+**未覆盖：**
+- Ralph Loop（任务队列驱动连续执行） vs 我们的 `/loop`（定时轮询）— 完全不同的模式
+- `claude -p` 非交互式 API — CC 作为可编程组件的用法
+- CC-管-CC meta-orchestration — 跨进程 agent 编排
+- PROGRESS.md 经验沉淀 — 项目级教训积累文件
+- "不看代码"管理哲学 — 使用心法层面的内容
+
+---
+
+## 8. Completed Demos
 - Slides demo: https://freemty.github.io/steam-steel-infinite-minds.html
