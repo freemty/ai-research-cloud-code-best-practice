@@ -1,89 +1,103 @@
-<!-- Slide 36: Key Takeaways -->
-<section class="slide">
+<!-- ============================================================
+     Closing — Mindset + References + End
+     ============================================================ -->
+
+<!-- Slide: Mindset — The Meta Layer -->
+<section class="slide" id="slide-mindset">
   <div class="slide-content">
-    <h2 class="reveal">核心要点</h2>
-    <ul class="bullet-list">
-      <li class="reveal">
-        <span class="accent highlight">1.</span>
-        这是<strong>范式跃迁</strong>，不是工具更换
-      </li>
-      <li class="reveal">
-        <span class="accent highlight">2.</span>
-        工程化你的 <span class="mono">Harness</span>：
-        <span class="accent">Hooks</span> +
-        <span class="accent">Skills</span> +
-        <span class="accent">Subagents</span> +
-        <span class="accent">Loop</span>
-      </li>
-      <li class="reveal">
-        <span class="accent highlight">3.</span>
-        <span class="mono">Context</span> 是最关键的资源 &mdash; <strong>主动管理它</strong>
-      </li>
-      <li class="reveal">
-        <span class="accent highlight">4.</span>
-        构建<strong>可复用的工作流</strong>，而非一次性 <span class="mono">Prompt</span>
-      </li>
-    </ul>
+    <h2>Technique 不重要，<span class="accent">Mindset</span> 才重要</h2>
+
+    <div class="terminal-box" style="margin-top:1.2rem;padding:1.2rem 1.5rem;border-color:rgba(0,255,102,0.3);">
+      <p style="font-size:1.1rem;color:#eee;line-height:1.5;text-align:center;font-style:italic;">
+        "Steel. Steam. <span class="accent">Infinite minds</span>.<br>
+        The next skyline is there, waiting for us to build it."
+      </p>
+      <p class="mono dim" style="font-size:0.72rem;text-align:center;margin-top:0.5rem;">
+        — Ivan Zhao (Notion), "Steam, Steel, and Infinite Minds"
+      </p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem;">
+      <div class="terminal-box" style="padding:1.3rem;">
+        <p class="accent mono" style="font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">THE META LAYER</p>
+        <p style="color:#ccc;font-size:0.92rem;line-height:1.7;">
+          这个时代最酷的一件事：<br>
+          每当 AI 能帮我们做一件事，<br>
+          我们就可以<span class="highlight">往上跳一层</span> —<br>
+          思考如何在更 Meta 的层面<br>
+          去优化一个 AI agent 来<span class="accent">迭代</span>这件事
+        </p>
+      </div>
+
+      <div class="terminal-box" style="padding:1.3rem;">
+        <p class="accent mono" style="font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">CASE IN POINT</p>
+        <p style="color:#ccc;font-size:0.92rem;line-height:1.7;">
+          <span class="highlight">Labmate</span> 本身就是用 Claude Code 开发的<br>
+          现在它在加速一个<br>
+          <span class="accent">Language Model Prompting Agent</span> 的训练<br><br>
+          <span class="dim">Agent 构建的基础设施，</span><br>
+          <span class="dim">正在被用来训练下一个 Agent</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:1.2rem;padding:0.8rem 1.2rem;text-align:center;border-color:rgba(0,255,102,0.4);">
+      <p style="font-size:0.95rem;color:#eee;">
+        Scalable 自我觉察：Agent 不只是执行任务 — 它<span class="highlight">维护着让自己随时间变聪明的基础设施</span>
+      </p>
+    </div>
   </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);right:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.5;line-height:1.6;">
+    [1] Ivan Zhao, "Steam, Steel, and Infinite Minds" — notion.com/zh-cn/blog/steam-steel-and-infinite-minds-ai
+  </p>
 </section>
 
-<!-- Slide 37: References (Full Reading List) -->
-<section class="slide">
+<!-- Slide: References -->
+<section class="slide" id="slide-references">
   <div class="slide-content">
-    <h2 class="reveal">参考阅读</h2>
-    <div class="reveal" style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(0.6rem,1.2vw,1rem);margin-top:clamp(0.8rem,1.5vh,1.2rem);">
-      <!-- Column 1: Official Docs + Harness Papers -->
+    <h2>参考阅读</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:clamp(0.6rem,1.2vw,1rem);margin-top:clamp(0.8rem,1.5vh,1.2rem);">
       <div style="display:flex;flex-direction:column;gap:clamp(0.5rem,1vh,0.8rem);">
+        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
+          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">HARNESS ENGINEERING</p>
+          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
+            <div><span class="highlight">Anthropic</span> &mdash; Effective Harnesses for Long-Running Agents</div>
+            <div><span class="highlight">Anthropic</span> &mdash; Effective Context Engineering for AI Agents</div>
+            <div><span class="highlight">OpenAI</span> &mdash; Harness Engineering</div>
+            <div><span class="highlight">Manus</span> &mdash; Context Engineering</div>
+            <div><span class="highlight">Ivan Zhao</span> &mdash; Steam, Steel, and Infinite Minds</div>
+          </div>
+        </div>
         <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
           <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">OFFICIAL DOCS</p>
           <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
             <div>code.claude.com/docs/en/overview</div>
-            <div>code.claude.com/docs/en/best-practices</div>
-            <div>code.claude.com/docs/en/how-claude-code-works</div>
-            <div>code.claude.com/docs/en/memory</div>
-            <div>code.claude.com/docs/en/hooks-guide</div>
+            <div>code.claude.com/docs/en/hooks</div>
             <div>code.claude.com/docs/en/skills</div>
             <div>code.claude.com/docs/en/sub-agents</div>
-            <div>code.claude.com/docs/en/features-overview</div>
-          </div>
-        </div>
-        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
-          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">HARNESS ENGINEERING</p>
-          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
-            <div><span class="highlight">OpenAI</span> &mdash; openai.com/index/harness-engineering</div>
-            <div><span class="highlight">Anthropic</span> &mdash; anthropic.com/engineering/effective-harnesses-for-long-running-agents</div>
-            <div><span class="highlight">Manus</span> &mdash; manus.im/blog/context-engineering</div>
-            <div><span class="highlight">Anthropic</span> &mdash; anthropic.com/engineering/effective-context-engineering-for-ai-agents</div>
+            <div>code.claude.com/docs/en/memory</div>
           </div>
         </div>
       </div>
-      <!-- Column 2: People + Community -->
       <div style="display:flex;flex-direction:column;gap:clamp(0.5rem,1vh,0.8rem);">
         <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
           <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">KEY PEOPLE</p>
           <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
-            <div><span class="highlight">@trq212</span> &mdash; Thariq Shihipar, Skills 九大分类 (Anthropic 内部实战)</div>
-            <div><span class="highlight">@bcherny</span> &mdash; Boris Cherny, Claude Code creator — 10 Tips</div>
+            <div><span class="highlight">@trq212</span> &mdash; Skills 九大分类 (Anthropic)</div>
+            <div><span class="highlight">@bcherny</span> &mdash; Boris Cherny, 10 Tips</div>
             <div><span class="highlight">@systematicls</span> &mdash; 9 Coding Agent Principles</div>
-            <div><span class="highlight">@HiTw93</span> &mdash; Tw93, Claude Code 六层架构深度解析</div>
+            <div><span class="highlight">@HiTw93</span> &mdash; 六层架构深度解析</div>
+            <div><span class="highlight">AReaL</span> &mdash; 32 天零手打代码构建分布式 RL</div>
           </div>
         </div>
         <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
           <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">GITHUB</p>
           <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
-            <div>anthropics/claude-code <span class="highlight">(78.1k stars)</span></div>
-            <div>anthropics/skills — Skill Creator Guide</div>
-            <div>obra/superpowers — 完整开发工作流 (14 Skills + Subagent-Driven Dev)</div>
-            <div>inclusionAI/AReaL — 32天零手打代码构建分布式 RL 框架</div>
-            <div>affaan-m/everything-claude-code</div>
-          </div>
-        </div>
-        <div class="terminal-box" style="padding:clamp(0.5rem,1vh,0.8rem) clamp(0.6rem,1.2vw,1rem);">
-          <p class="accent mono" style="font-size:clamp(0.6rem,0.9vw,0.75rem);font-weight:700;margin-bottom:clamp(0.3rem,0.6vh,0.5rem);letter-spacing:0.1em;">COMMUNITY & TOOLS</p>
-          <div class="mono dim" style="font-size:clamp(0.5rem,0.75vw,0.65rem);line-height:1.7;">
-            <div>skills.sh &mdash; MCP Skill Marketplace</div>
-            <div>clawhub.com &mdash; Agent Reach</div>
-            <div>platform.claude.com/docs/en/agent-sdk</div>
+            <div><span class="highlight">freemty/labmate</span> &mdash; 研究项目 Claude Code plugin</div>
+            <div>obra/superpowers &mdash; 完整软件工程工作流</div>
+            <div>anthropics/claude-code &mdash; Official repo</div>
+            <div>inclusionAI/AReaL &mdash; 分布式 RL 框架</div>
+            <div>huggingface/skills &mdash; HF Daily Paper Skill</div>
           </div>
         </div>
       </div>
@@ -91,16 +105,23 @@
   </div>
 </section>
 
-<!-- Slide 38: End -->
-<section class="slide section-title-slide">
-  <div class="slide-content">
-    <h1 class="reveal">Questions?<span class="cursor">&#x258C;</span></h1>
-    <blockquote class="big-quote reveal">
-      "未来属于那些<strong>工程化 Agent</strong> 的人，<br>
-      而非仅仅 <span class="mono">Prompt</span> 它们的人。"
-    </blockquote>
-    <p class="dim reveal">
-      &mdash; @sum_young &nbsp;|&nbsp; 2026-03-16
+<!-- Slide: End -->
+<section class="slide section-title-slide" id="slide-end">
+  <div class="slide-content" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2rem;">
+    <h1 style="font-size:2.8rem;">Questions?<span class="cursor">&#x258C;</span></h1>
+    <div class="terminal-box" style="padding:1.5rem 2rem;border-color:rgba(0,255,102,0.3);max-width:700px;">
+      <p style="font-size:1.15rem;color:#eee;line-height:1.6;">
+        "We want humans to <span class="accent">supervise the loops</span><br>
+        from a leveraged point, not be in them."
+      </p>
+      <p class="mono dim" style="font-size:0.75rem;margin-top:0.6rem;">— Ivan Zhao</p>
+    </div>
+    <p class="dim" style="font-size:0.95rem;">
+      <span class="mono accent">@sum_young</span>
+      &nbsp;&bull;&nbsp;
+      <span class="mono">2026-03-16</span>
+      &nbsp;&bull;&nbsp;
+      <span class="mono">github.com/freemty/labmate</span>
     </p>
   </div>
 </section>

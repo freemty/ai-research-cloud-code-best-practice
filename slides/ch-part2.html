@@ -1,391 +1,634 @@
 <!-- ============================================================
-     Part 2: Scenarios & Features  (Slides 13–27)
+     Part 2: 实践篇 — Features Serving Context
      ============================================================ -->
 
-<!-- Slide 13: Part 2 Section Title -->
-<section class="slide section-title-slide">
+<!-- Slide: Motivation — 现状 -->
+<section class="slide" id="slide-motivation">
   <div class="slide-content">
-    <div class="section-number">Part 2</div>
-    <h1>场景与功能实践</h1>
-    <p class="accent" style="font-size:1.6rem; margin-top: 1rem;">IDE 助手做不到的事</p>
-  </div>
-</section>
+    <h2>现状：最佳实践在<span class="accent">快速迭代</span></h2>
+    <p class="dim" style="font-size:0.95rem;margin-top:-0.3rem;">
+      CLI Agent 生态每周都在变 — 新 feature、新 pattern、新 workflow 层出不穷。
+    </p>
 
-<!-- Slide 14: The Big Four Features -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>四大核心 Feature</h2>
-    <div class="feature-grid" style="grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-top: 2rem;">
-      <div class="feature-card">
-        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">⚙ Hook</div>
-        <div>自动化护栏与触发器</div>
-        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">事件驱动的确定性执行</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.5rem;">
+      <div class="terminal-box" style="padding:1.2rem 1.4rem;">
+        <p class="mono accent" style="font-size:0.8rem;letter-spacing:0.1em;margin-bottom:0.8rem;">COMMUNITY VOICES</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.6rem;">
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">@bcherny</span> <span class="dim">— 10 Tips for Claude Code</span>
+          </li>
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">@trq212</span> <span class="dim">— Anthropic 内部 Skills 九大分类</span>
+            <a href="https://x.com/trq212/status/2033949937936085378" style="color:#555;font-size:0.7rem;margin-left:0.3rem;">[link]</a>
+          </li>
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">@systematicls</span> <span class="dim">— 9 Coding Agent Principles</span>
+          </li>
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">@HiTw93</span> <span class="dim">— 六层架构深度解析</span>
+            <a href="https://x.com/HiTw93/status/2032091246588518683" style="color:#555;font-size:0.7rem;margin-left:0.3rem;">[link]</a>
+          </li>
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">胡渊鸣</span> <span class="dim">— 如何给 10 个 Claude Code 打工</span>
+          </li>
+          <li class="mono" style="font-size:0.85rem;color:#ccc;">
+            <span class="accent">AReaL</span> <span class="dim">— 32 天零手打代码构建分布式 RL</span>
+          </li>
+        </ul>
       </div>
-      <div class="feature-card">
-        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">📚 Skills</div>
-        <div>可复用领域知识</div>
-        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">机器可读的实验室手册</div>
-      </div>
-      <div class="feature-card">
-        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🤖 Sub-agent</div>
-        <div>并行任务分解</div>
-        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">独立 context 的专家代理</div>
-      </div>
-      <div class="feature-card">
-        <div class="accent" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 0.6rem;">🔁 Loop</div>
-        <div>循环自主监控</div>
-        <div class="dim" style="margin-top: 0.4rem; font-size: 0.85rem;">定时轮询 + 自主响应</div>
+
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem 1.4rem;flex:1;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.5rem;">THE PROBLEM</p>
+          <p style="color:#eee;font-size:0.95rem;line-height:1.6;">
+            新 feature 不断涌现<br>
+            每个人的 workflow 都不一样<br>
+            <span class="highlight">不知道从哪里开始</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1.2rem 1.4rem;flex:1;border-color:rgba(0,255,102,0.4);">
+          <p class="mono accent" style="font-size:0.8rem;margin-bottom:0.5rem;">OUR APPROACH</p>
+          <p style="color:#eee;font-size:0.95rem;line-height:1.6;">
+            不追单个 feature<br>
+            围绕 <span class="highlight">Context</span> 理解每个工具的角色<br>
+            建立可复用的工作流
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Slide 15: Hook Introduction -->
-<section class="slide">
+<!-- Slide: Features Serve Context (callback to Part 1) -->
+<section class="slide" id="slide-features-context">
   <div class="slide-content">
-    <h2>Hook — 事件驱动的自动化</h2>
-    <p class="dim" style="margin-bottom: 1.5rem;">Shell 脚本在特定事件触发 — 确定性执行，不是建议</p>
-    <div class="terminal-box">
-      <table class="terminal-table" style="width: 100%;">
-        <thead>
-          <tr>
-            <th>类型</th>
-            <th>触发时机</th>
-            <th>能力</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="accent mono">PreToolUse</td>
-            <td>工具执行前</td>
-            <td class="highlight">阻止 + 验证 + 修改参数</td>
-          </tr>
-          <tr>
-            <td class="accent mono">PostToolUse</td>
-            <td>执行后</td>
-            <td class="highlight">格式化 + 检查 + 推进流水线</td>
-          </tr>
-          <tr>
-            <td class="accent mono">Stop</td>
-            <td>即将停止时</td>
-            <td class="highlight">阻止停止 + 注入提醒</td>
-          </tr>
-          <tr>
-            <td class="accent mono">PreCompact</td>
-            <td>压缩前</td>
-            <td class="highlight">设标记 + 保存状态</td>
-          </tr>
-        </tbody>
-      </table>
+    <h2>Connect the Dots：<span class="accent">Features</span> Serve Context</h2>
+    <p class="dim" style="font-size:0.95rem;margin-top:-0.3rem;">
+      Skills、Hooks、Sub-agent、Loop — 不是凭空出现的功能，而是服务于 context 三个维度的工具。
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.8rem;">
+      <!-- Input -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #4a9;">
+        <p class="mono" style="color:#4a9;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">INPUT</p>
+        <p style="font-size:0.9rem;color:#ccc;line-height:1.6;margin-bottom:0.8rem;">
+          把足够的信息交给 Agent
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,170,153,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#4a9;">Skills</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,170,153,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#4a9;">MCP</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,170,153,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#4a9;">CLAUDE.md</span>
+        </div>
+      </div>
+
+      <!-- Output -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #48a;">
+        <p class="mono" style="color:#48a;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">OUTPUT</p>
+        <p style="font-size:0.9rem;color:#ccc;line-height:1.6;margin-bottom:0.8rem;">
+          让 Agent 做高效决策和执行
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,136,170,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#48a;">Hooks</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,136,170,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#48a;">Sub-agents</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(68,136,170,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#48a;">Loop</span>
+        </div>
+      </div>
+
+      <!-- Management -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #a84;">
+        <p class="mono" style="color:#a84;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">MANAGEMENT</p>
+        <p style="font-size:0.9rem;color:#ccc;line-height:1.6;margin-bottom:0.8rem;">
+          保持 Agent 头脑清醒
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+          <span class="mono" style="font-size:0.8rem;background:rgba(170,136,68,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#a84;">Memory</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(170,136,68,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#a84;">/compact</span>
+          <span class="mono" style="font-size:0.8rem;background:rgba(170,136,68,0.1);padding:0.2rem 0.5rem;border:1px solid #333;color:#a84;">Sub-agent</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:1.2rem;padding:0.8rem 1.2rem;text-align:center;">
+      <span style="font-size:0.95rem;color:#eee;">
+        接下来逐一介绍：<span class="accent">Skills</span> → <span class="accent">Hooks</span> → <span class="accent">Sub-agents</span> → <span class="accent">Loop</span>
+      </span>
     </div>
   </div>
-  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/hooks-guide</p>
 </section>
 
-<!-- Slide 16: Hook Pipeline -->
-<section class="slide">
+<!-- Slide: Skills — What & Why -->
+<section class="slide" id="slide-skills-intro">
   <div class="slide-content">
-    <h2>Hook 实战: 实验流水线</h2>
-    <div class="terminal-box" style="margin: 1.5rem 0;">
-      <div class="mono" style="line-height: 2.2; font-size: 0.95rem;">
-        <span class="accent">dev</span>
-        <span class="dim"> ──→ </span>
-        <span class="highlight">skill-update</span>
-        <span class="dim"> ──→ </span>
-        <span class="accent">experiment</span>
-        <span class="dim"> ──→ </span>
-        <span class="highlight">monitoring</span>
-        <span class="dim"> ──→ </span>
-        <span class="accent">analysis</span>
-        <span class="dim"> ──→ </span>
+    <h2>Skills — 可复用工作流的<span class="accent">分发单元</span></h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      Markdown 文件（可含脚本、数据、模板），按需加载到 context，用完即释放。
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.2rem;">
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.5rem;">WHAT IS A SKILL?</p>
+          <p style="color:#ccc;font-size:0.9rem;line-height:1.6;">
+            一段 Agent 可直接消费的<span class="highlight">结构化知识</span><br>
+            定义了 <span class="highlight">何时触发</span>、做什么、怎么做<br>
+            本质：<span class="accent">工作流的可重复化分发</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1rem;border-color:rgba(0,255,102,0.3);">
+          <p class="mono dim" style="font-size:0.75rem;margin-bottom:0.4rem;">ANTHROPIC OFFICIAL</p>
+          <p style="color:#ccc;font-size:0.85rem;line-height:1.5;">
+            Anthropic 内部有<span class="highlight">几百个活跃 Skills</span><br>
+            覆盖从代码审查到运维手册的全流程
+          </p>
+        </div>
+      </div>
+
+      <div class="terminal-box" style="padding:1.2rem;">
+        <p class="mono dim" style="font-size:0.8rem;letter-spacing:0.1em;margin-bottom:0.8rem;">POPULAR SKILLS</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.5rem;">
+          <li style="display:flex;gap:0.8rem;font-size:0.85rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:9rem;flex-shrink:0;">notion-lifeos</span>
+            <span class="dim">Notion PARA 系统集成 — 任务/笔记/项目管理</span>
+          </li>
+          <li style="display:flex;gap:0.8rem;font-size:0.85rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:9rem;flex-shrink:0;">frontend-design</span>
+            <span class="dim">生产级前端 UI 设计与代码生成</span>
+          </li>
+          <li style="display:flex;gap:0.8rem;font-size:0.85rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:9rem;flex-shrink:0;">proactive-agent</span>
+            <span class="dim">让 Agent 从任务执行者变为主动协作者</span>
+          </li>
+          <li style="display:flex;gap:0.8rem;font-size:0.85rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:9rem;flex-shrink:0;">hf-paper-pages</span>
+            <span class="dim">HuggingFace Daily Paper 检索与分析</span>
+          </li>
+          <li style="display:flex;gap:0.8rem;font-size:0.85rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:9rem;flex-shrink:0;">superpowers</span>
+            <span class="dim">完整软件工程工作流 (brainstorm → plan → TDD)</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);right:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;line-height:1.6;">
+    Source: code.claude.com/docs/en/skills &ensp;|&ensp; HF Paper Skill: github.com/huggingface/skills
+  </p>
+</section>
+
+<!-- Slide: Skills — Value for Researchers -->
+<section class="slide" id="slide-skills-value">
+  <div class="slide-content">
+    <h2>Skills 对研究者的<span class="accent">价值</span></h2>
+
+    <div style="display:flex;flex-direction:column;gap:1.2rem;margin-top:1.5rem;">
+      <div class="terminal-box" style="padding:1.2rem 1.5rem;border-left:3px solid #4a9;">
+        <div style="display:flex;align-items:flex-start;gap:1rem;">
+          <span class="mono" style="color:#4a9;font-size:1.2rem;font-weight:700;flex-shrink:0;">01</span>
+          <div>
+            <p class="highlight" style="font-size:1rem;margin-bottom:0.4rem;">Context 满了？整理成 Skill</p>
+            <p style="color:#aaa;font-size:0.9rem;line-height:1.6;">
+              当你发现反复在 session 开头粘贴同样的背景信息，<br>
+              说明这些知识该固化为 Skill — 按需加载，不占常驻 context
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal-box" style="padding:1.2rem 1.5rem;border-left:3px solid #48a;">
+        <div style="display:flex;align-items:flex-start;gap:1rem;">
+          <span class="mono" style="color:#48a;font-size:1.2rem;font-weight:700;flex-shrink:0;">02</span>
+          <div>
+            <p class="highlight" style="font-size:1rem;margin-bottom:0.4rem;">重复的 Workflow → 一键 Skill</p>
+            <p style="color:#aaa;font-size:0.9rem;line-height:1.6;">
+              跑实验、写周报、做 slides、review 论文 — 只要做过两次以上的流程，<br>
+              都值得写成 Skill，之后 <span class="accent mono">/skill-name</span> 一键复用，持续迭代优化
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="terminal-box" style="padding:1.2rem 1.5rem;border-left:3px solid #a84;">
+        <div style="display:flex;align-items:flex-start;gap:1rem;">
+          <span class="mono" style="color:#a84;font-size:1.2rem;font-weight:700;flex-shrink:0;">03</span>
+          <div>
+            <p class="highlight" style="font-size:1rem;margin-bottom:0.4rem;">告别漫长 Prompt，维护 Skill 即可</p>
+            <p style="color:#aaa;font-size:0.9rem;line-height:1.6;">
+              不需要每次都写 500 字的 prompt 描述需求和约束，<br>
+              Skill 内已编码了所有流程、踩坑点和质量标准 — <span class="accent">用时加载，用完释放</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide: Skills Best Practices -->
+<section class="slide" id="slide-skills-best-practices">
+  <div class="slide-content">
+    <h2>Skills <span class="accent">最佳实践</span></h2>
+    <p class="dim" style="font-size:0.82rem;margin-bottom:0.8rem;">Source: Thariq Shihipar (@trq212), Anthropic 内部几百个 Skills 的经验提炼</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:0.8rem;">
+      <!-- Left: Writing Tips -->
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;">DESCRIPTION = 触发条件</p>
+          <p style="color:#aaa;font-size:0.85rem;line-height:1.5;">
+            写「<span class="highlight">何时使用</span>」而非「我是什么」<br>
+            <span class="dim">让 Agent 能自动判断何时加载</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;">GOTCHAS = 最有价值的部分</p>
+          <p style="color:#aaa;font-size:0.85rem;line-height:1.5;">
+            踩坑点、边界条件、已知问题<br>
+            <span class="dim">这些是 Agent 最容易犯错的地方</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1rem 1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.4rem;">渐进式披露</p>
+          <p style="color:#aaa;font-size:0.85rem;line-height:1.5;">
+            用子目录按需加载详细内容<br>
+            <span class="dim">主 Skill 精简，细节在子文件中</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: 9 Categories -->
+      <div>
+        <p class="mono dim" style="font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.6rem;">ANTHROPIC 九大分类</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;">
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">1.</span> <span style="font-size:0.75rem;color:#ccc;">库与 API 参考</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">2.</span> <span style="font-size:0.75rem;color:#ccc;">产品验证</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">3.</span> <span style="font-size:0.75rem;color:#ccc;">数据获取与分析</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">4.</span> <span style="font-size:0.75rem;color:#ccc;">业务流程自动化</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">5.</span> <span style="font-size:0.75rem;color:#ccc;">代码脚手架</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">6.</span> <span style="font-size:0.75rem;color:#ccc;">代码质量与审查</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">7.</span> <span style="font-size:0.75rem;color:#ccc;">CI/CD 与部署</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;">
+            <span class="accent mono" style="font-size:0.75rem;">8.</span> <span style="font-size:0.75rem;color:#ccc;">运维手册</span>
+          </div>
+          <div class="terminal-box" style="padding:0.4rem 0.7rem;grid-column:span 2;">
+            <span class="accent mono" style="font-size:0.75rem;">9.</span> <span style="font-size:0.75rem;color:#ccc;">基础设施运维</span>
+          </div>
+        </div>
+        <p class="mono dim" style="font-size:0.72rem;margin-top:0.6rem;line-height:1.5;">
+          Skill 做得好的标志：<br>
+          新人读完后能<span class="highlight">独立完成</span>该类任务
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: @trq212, x.com/trq212/status/2033949937936085378</p>
+</section>
+
+<!-- Slide: The New Repetitive Labor -->
+<section class="slide" id="slide-hooks-problem">
+  <div class="slide-content">
+    <h2>新的<span class="accent">重复劳动</span></h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      Claude Code 消灭了写代码的重复劳动 — 但践行 Best Practice 这件事本身，又成了新的重复劳动。
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.5rem;">
+      <div class="terminal-box" style="padding:1.3rem;border-color:rgba(248,113,113,0.3);">
+        <p class="mono" style="color:#f87171;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.8rem;">WE KEEP FORGETTING TO...</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.6rem;">
+          <li style="font-size:0.9rem;color:#ccc;display:flex;gap:0.6rem;align-items:flex-start;">
+            <span style="color:#f87171;">&#x2717;</span>
+            <span>开 worktree 隔离工作 → 直接在 main 上改</span>
+          </li>
+          <li style="font-size:0.9rem;color:#ccc;display:flex;gap:0.6rem;align-items:flex-start;">
+            <span style="color:#f87171;">&#x2717;</span>
+            <span>把重复 context 整理成 Skill → 每次重新粘贴</span>
+          </li>
+          <li style="font-size:0.9rem;color:#ccc;display:flex;gap:0.6rem;align-items:flex-start;">
+            <span style="color:#f87171;">&#x2717;</span>
+            <span>按规范写 commit message → 随手一句话</span>
+          </li>
+          <li style="font-size:0.9rem;color:#ccc;display:flex;gap:0.6rem;align-items:flex-start;">
+            <span style="color:#f87171;">&#x2717;</span>
+            <span>push 前 review diff → 直接 push</span>
+          </li>
+          <li style="font-size:0.9rem;color:#ccc;display:flex;gap:0.6rem;align-items:flex-start;">
+            <span style="color:#f87171;">&#x2717;</span>
+            <span>清理 console.log → 带着调试代码上线</span>
+          </li>
+        </ul>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="mono dim" style="font-size:0.8rem;margin-bottom:0.5rem;">INCONSISTENCY</p>
+          <p style="color:#ccc;font-size:0.9rem;line-height:1.6;">
+            有些 repo 执行了规范<br>
+            有些没有<br>
+            <span class="highlight">执行力取决于记忆力</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1.2rem;border-color:rgba(0,255,102,0.4);">
+          <p class="mono accent" style="font-size:0.8rem;margin-bottom:0.5rem;">THE IRONY</p>
+          <p style="color:#ccc;font-size:0.9rem;line-height:1.6;">
+            我们用 AI 消灭了代码的重复劳动<br>
+            却在<span class="highlight">管理 AI</span> 这件事上<br>
+            制造了新的重复劳动
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide: Hooks — Official Overview -->
+<section class="slide" id="slide-hooks-solution">
+  <div class="slide-content">
+    <h2>Hooks — <span class="accent">确定性</span>地消灭重复劳动</h2>
+
+    <div class="terminal-box" style="margin-top:0.8rem;padding:0.8rem 1.2rem;border-color:rgba(0,255,102,0.3);">
+      <p style="font-size:0.88rem;color:#ccc;line-height:1.5;font-style:italic;">
+        "Hooks are user-defined shell commands, HTTP endpoints, or LLM prompts that execute automatically at specific points in Claude Code's lifecycle."
+      </p>
+      <p class="mono dim" style="font-size:0.7rem;margin-top:0.3rem;">— code.claude.com/docs/en/hooks</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1rem;">
+      <!-- Left: Handler Types -->
+      <div>
+        <p class="mono dim" style="font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.6rem;">4 HANDLER TYPES</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+          <div class="terminal-box" style="padding:0.6rem 0.8rem;">
+            <span class="accent mono" style="font-size:0.8rem;font-weight:700;">command</span>
+            <p class="dim" style="font-size:0.72rem;margin-top:0.2rem;">Shell 脚本 via stdin/stdout</p>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 0.8rem;">
+            <span class="accent mono" style="font-size:0.8rem;font-weight:700;">http</span>
+            <p class="dim" style="font-size:0.72rem;margin-top:0.2rem;">POST 到 HTTP endpoint</p>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 0.8rem;">
+            <span class="accent mono" style="font-size:0.8rem;font-weight:700;">prompt</span>
+            <p class="dim" style="font-size:0.72rem;margin-top:0.2rem;">单轮 LLM 判断</p>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 0.8rem;">
+            <span class="accent mono" style="font-size:0.8rem;font-weight:700;">agent</span>
+            <p class="dim" style="font-size:0.72rem;margin-top:0.2rem;">Spawn subagent 执行</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Key Events -->
+      <div>
+        <p class="mono dim" style="font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.6rem;">KEY EVENTS (13+)</p>
+        <div class="terminal-box" style="padding:0.8rem 1rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.3rem 1rem;font-size:0.78rem;">
+            <span><span class="accent mono">SessionStart</span> <span class="dim">会话开始</span></span>
+            <span><span class="accent mono">PreToolUse</span> <span class="dim">工具执行前</span></span>
+            <span><span class="accent mono">PostToolUse</span> <span class="dim">执行后</span></span>
+            <span><span class="accent mono">Stop</span> <span class="dim">回复结束</span></span>
+            <span><span class="accent mono">PreCompact</span> <span class="dim">压缩前</span></span>
+            <span><span class="accent mono">SubagentStart</span> <span class="dim">子代理启动</span></span>
+            <span><span class="accent mono">UserPromptSubmit</span> <span class="dim">提交前</span></span>
+            <span><span class="accent mono">ConfigChange</span> <span class="dim">配置变更</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.6rem;margin-top:0.8rem;font-size:0.78rem;">
+      <div class="terminal-box" style="padding:0.5rem 0.8rem;">
+        <span class="highlight">matcher</span><span class="dim"> 用正则过滤触发条件</span>
+      </div>
+      <div class="terminal-box" style="padding:0.5rem 0.8rem;">
+        <span class="highlight">exit 2</span><span class="dim"> = 阻止操作，exit 0 = 放行</span>
+      </div>
+      <div class="terminal-box" style="padding:0.5rem 0.8rem;">
+        <span class="highlight">3 层配置</span><span class="dim"> User / Project / Local</span>
+      </div>
+    </div>
+
+    <p class="mono dim" style="text-align:center;margin-top:0.6rem;font-size:0.82rem;">
+      Hook = <span class="highlight">把 Best Practice 从"记忆"变成"机制"</span> — 在所有 repo 一致执行
+    </p>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/hooks</p>
+</section>
+
+<!-- Slide: Hook-Driven Context Automation -->
+<section class="slide" id="slide-hooks-context">
+  <div class="slide-content">
+    <h2>Hook 驱动的 <span class="accent">Context 自动化</span></h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      回到 Context 管理 — Hook 让这些规范自动执行，不再依赖人的自觉
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.2rem;">
+      <!-- Left: Context Dimensions -->
+      <div style="display:flex;flex-direction:column;gap:0.7rem;">
+        <div class="terminal-box" style="padding:0.9rem 1.2rem;border-left:3px solid #4a9;">
+          <span class="mono" style="color:#4a9;font-size:0.78rem;font-weight:700;">INPUT</span>
+          <p style="font-size:0.85rem;color:#ccc;margin-top:0.3rem;">
+            <span class="accent mono">Stop</span> 检测到 10+ 文件编辑 → 提醒 <span class="highlight mono">/writing-skills</span> 沉淀为 Skill
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:0.9rem 1.2rem;border-left:3px solid #48a;">
+          <span class="mono" style="color:#48a;font-size:0.78rem;font-weight:700;">OUTPUT</span>
+          <p style="font-size:0.85rem;color:#ccc;margin-top:0.3rem;">
+            <span class="accent mono">PostToolUse</span> Skill 完成 → 自动推进 pipeline → 提醒 <span class="highlight mono">/slides-dispatch</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:0.9rem 1.2rem;border-left:3px solid #a84;">
+          <span class="mono" style="color:#a84;font-size:0.78rem;font-weight:700;">MANAGE</span>
+          <p style="font-size:0.85rem;color:#ccc;margin-top:0.3rem;">
+            <span class="accent mono">PreCompact</span> 压缩前保存 pipeline 状态到 <span class="highlight mono">state.json</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Right: Experiment Management -->
+      <div class="terminal-box" style="padding:1rem 1.2rem;">
+        <p class="accent mono" style="font-size:0.78rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">CASE: EXPERIMENT MANAGEMENT</p>
+        <div class="terminal-box" style="padding:0.6rem 0.8rem;margin-bottom:0.6rem;font-size:0.8rem;background:rgba(0,255,102,0.03);">
+          <div class="mono" style="line-height:1.7;">
+            <span class="dim">exp/</span><br>
+            <span class="dim">&ensp;&ensp;</span><span class="accent">exp01a/</span> <span class="dim">&ensp;# major=01, minor=a</span><br>
+            <span class="dim">&ensp;&ensp;&ensp;&ensp;</span>docs/ <span class="dim">&ensp;&ensp;# 实验设计 + 结论</span><br>
+            <span class="dim">&ensp;&ensp;&ensp;&ensp;</span>scripts/ <span class="dim"># 运行脚本</span><br>
+            <span class="dim">&ensp;&ensp;&ensp;&ensp;</span>summary.md <span class="dim"># 结果总结</span><br>
+            <span class="dim">&ensp;&ensp;</span><span class="accent">exp01b/</span> <span class="dim">&ensp;# 同大版本的变体</span><br>
+            <span class="dim">&ensp;&ensp;</span><span class="accent">exp02a/</span> <span class="dim">&ensp;# 新大版本</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.3rem;font-size:0.78rem;">
+          <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:6rem;">SessionStart</span>
+            <span class="dim">自动检测当前实验 ID，加载对应 context</span>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:6rem;">PostToolUse</span>
+            <span class="dim">新建实验时自动创建标准目录结构</span>
+          </div>
+          <div style="display:flex;gap:0.5rem;align-items:flex-start;">
+            <span class="accent mono" style="min-width:6rem;">Stop</span>
+            <span class="dim">实验结束前提醒填写 summary.md</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:0.8rem;padding:0.8rem 1.2rem;">
+      <p class="mono dim" style="font-size:0.72rem;margin-bottom:0.4rem;">EXPERIMENT PIPELINE (HOOK-DRIVEN)</p>
+      <div class="mono" style="font-size:0.82rem;line-height:2;text-align:center;">
+        <span class="accent">new-exp</span>
+        <span class="dim"> →<sup style="font-size:0.55rem;color:#4a9;">hook</sup> </span>
+        <span class="highlight">scaffold</span>
+        <span class="dim"> →<sup style="font-size:0.55rem;color:#48a;">hook</sup> </span>
+        <span class="accent">run</span>
+        <span class="dim"> →<sup style="font-size:0.55rem;color:#48a;">hook</sup> </span>
+        <span class="highlight">analyze</span>
+        <span class="dim"> →<sup style="font-size:0.55rem;color:#a84;">hook</sup> </span>
+        <span class="accent">summary</span>
+        <span class="dim"> →<sup style="font-size:0.55rem;color:#a84;">hook</sup> </span>
         <span class="highlight">commit</span>
-        <span class="dim"> ──→ </span>
-        <span class="accent">dev</span>
-        <span class="dim"> (cycle)</span>
-        <span class="cursor">█</span>
       </div>
+      <p class="dim" style="font-size:0.72rem;text-align:center;margin-top:0.3rem;">
+        每个阶段由 hook 自动推进 — 你只需要关注当前实验
+      </p>
     </div>
-    <ul class="bullet-list">
-      <li>
-        <span class="accent mono">Stop hook</span>
-        <span> 检测到 10+ 文件编辑 → 提醒运行 </span>
-        <span class="highlight mono">/writing-skills</span>
-      </li>
-      <li>
-        <span class="accent mono">PostToolUse</span>
-        <span> 检测 Skill 完成 → 自动推进到下一阶段</span>
-      </li>
-      <li>
-        <span class="accent mono">Stop hook</span>
-        <span> 检测实验完成 → 提醒 </span>
-        <span class="highlight mono">/slides-dispatch</span>
-      </li>
-      <li>
-        手动控制: <span class="mono dim">pipeline-ctl.sh {status|set|skip|reset}</span>
-      </li>
-    </ul>
   </div>
 </section>
 
-<!-- Slide 17: Hook Safety Guardrails -->
-<section class="slide">
+<!-- Slide: Sub-agent — The Context Isolation Problem -->
+<section class="slide" id="slide-subagent-problem">
   <div class="slide-content">
-    <h2>Hook 实战: 安全护栏</h2>
-    <ul class="bullet-list" style="margin-top: 1.5rem;">
-      <li>
-        <span class="accent mono">slides-guard.sh</span>
-        <span class="dim"> — PreToolUse</span>
-        <br>
-        <span style="margin-left: 1.4rem;">拦截对重型 skill 的直接调用，建议使用 </span>
-        <span class="highlight mono">dispatcher</span>
-        <div class="terminal-box" style="margin: 0.6rem 0 0.6rem 1.4rem; font-size: 0.82rem; padding: 0.6rem 1rem;">
-          <span class="dim">[slides-guard]</span> Direct use of /agent-slides would fill main context.<br>
-          Use <span class="accent">/slides-dispatch</span> instead — delegates to subagent automatically.
+    <h2>Sub-agent — <span class="accent">Context Isolation</span> 的功能分区</h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      你想把论文知识输入到 repo，但读论文会污染你当前的 coding context。怎么办？
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1.5rem;margin-top:1.5rem;align-items:center;">
+      <!-- Problem -->
+      <div class="terminal-box" style="padding:1.2rem;border-color:rgba(248,113,113,0.3);">
+        <p class="mono" style="color:#f87171;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">WITHOUT ISOLATION</p>
+        <div class="mono" style="font-size:0.82rem;line-height:1.8;color:#ccc;">
+          <span class="dim">[Main Context]</span><br>
+          coding task <span class="dim">...50K tokens</span><br>
+          + paper content <span class="dim">...80K tokens</span><br>
+          + experiment logs <span class="dim">...30K tokens</span><br>
+          <span style="color:#f87171;">= context 被无关内容淹没</span><br>
+          <span style="color:#f87171;">= coding 质量下降</span>
         </div>
-      </li>
-      <li>
-        <span class="accent mono">console.log audit</span>
-        <span class="dim"> — Stop hook</span>
-        <br>
-        <span style="margin-left: 1.4rem;">会话结束前审计所有修改文件，阻止残留 console.log 提交</span>
-      </li>
-      <li>
-        <span class="accent mono">git push review</span>
-        <span class="dim"> — PreToolUse</span>
-        <br>
-        <span style="margin-left: 1.4rem;">推送前在编辑器中打开 diff 供人工审查，确认后再执行</span>
-      </li>
-    </ul>
+      </div>
+
+      <div style="font-size:2rem;color:rgba(0,255,102,0.5);">→</div>
+
+      <!-- Solution -->
+      <div class="terminal-box" style="padding:1.2rem;border-color:rgba(0,255,102,0.4);">
+        <p class="mono accent" style="font-size:0.78rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.6rem;">WITH SUBAGENTS</p>
+        <div class="mono" style="font-size:0.82rem;line-height:1.8;color:#ccc;">
+          <span class="highlight">[Main]</span> coding task <span class="dim">...50K</span><br>
+          <span class="accent">[Agent A]</span> 读论文 → <span class="dim">写入 repo</span><br>
+          <span class="accent">[Agent B]</span> 监控 jobs → <span class="dim">后台运行</span><br>
+          <span class="accent">[Agent C]</span> 管理实验 → <span class="dim">独立 context</span><br>
+          <span style="color:#4a9;">= 主 context 保持干净</span><br>
+          <span style="color:#4a9;">= 后台任务不停</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:1.2rem;padding:0.8rem 1.2rem;text-align:center;border-color:rgba(0,255,102,0.3);">
+      <span style="font-size:0.9rem;color:#eee;">
+        核心：<span class="highlight">专有 agent 获取专有 memory</span> — 主 context window 干净的同时，也能获取之前 session 的 context
+      </span>
+    </div>
   </div>
 </section>
 
-<!-- Slide 18: Skills Introduction -->
-<section class="slide">
+<!-- Slide: Sub-agent — Research Scenarios -->
+<section class="slide" id="slide-subagent-scenarios">
   <div class="slide-content">
-    <h2>Skills — 机器可读的实验室手册</h2>
-    <div style="margin-top: 2rem; display: flex; flex-direction: column; gap: 1.4rem;">
-      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
-        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">01</span>
-        <div>
-          <div class="highlight">文件夹，不只是 Markdown — 可含脚本、数据、模板</div>
-          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">按需加载到 context，不用时不占 token</div>
+    <h2>Sub-agent <span class="accent">研究场景</span></h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1.5rem;">
+      <!-- Paper Reader -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #4a9;display:flex;flex-direction:column;gap:0.6rem;">
+        <p class="mono" style="color:#4a9;font-size:0.8rem;font-weight:700;">PAPER READER</p>
+        <p style="font-size:0.9rem;color:#eee;font-weight:600;">读论文 → 沉淀到 repo</p>
+        <p style="font-size:0.82rem;color:#aaa;line-height:1.5;">
+          独立 context 读取 PDF<br>
+          提取方法论 + 关键公式<br>
+          写入 <span class="highlight mono">docs/papers/</span><br>
+          主 agent 只收到 summary
+        </p>
+        <div style="margin-top:auto;padding-top:0.5rem;border-top:1px solid #333;">
+          <p class="mono dim" style="font-size:0.72rem;">domain-expert agent + HF Paper Skill</p>
         </div>
       </div>
-      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
-        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">02</span>
-        <div>
-          <div class="highlight">编码跨 session 生存的制度知识</div>
-          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">实验流程、论文格式、代码规范 — 永不遗忘</div>
+
+      <!-- Background Monitor -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #48a;display:flex;flex-direction:column;gap:0.6rem;">
+        <p class="mono" style="color:#48a;font-size:0.8rem;font-weight:700;">BACKGROUND MONITOR</p>
+        <p style="font-size:0.9rem;color:#eee;font-weight:600;">后台监测运行中的 job</p>
+        <p style="font-size:0.82rem;color:#aaa;line-height:1.5;">
+          <span class="highlight mono">/loop</span> 定期访问 tmux<br>
+          获取 GPU 使用率 + loss<br>
+          异常时通知主 agent<br>
+          正常时静默运行
+        </p>
+        <div style="margin-top:auto;padding-top:0.5rem;border-top:1px solid #333;">
+          <p class="mono dim" style="font-size:0.72rem;">background agent + loop + tmux</p>
         </div>
       </div>
-      <div class="feature-card" style="display: flex; align-items: flex-start; gap: 1rem;">
-        <span class="accent" style="font-size: 1.5rem; flex-shrink: 0;">03</span>
-        <div>
-          <div class="highlight">"你的研究 playbook，agent 可直接消费"</div>
-          <div class="dim" style="font-size: 0.88rem; margin-top: 0.3rem;">从 idea 到 paper，每个阶段都有对应 skill</div>
+
+      <!-- Experiment Manager -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #a84;display:flex;flex-direction:column;gap:0.6rem;">
+        <p class="mono" style="color:#a84;font-size:0.8rem;font-weight:700;">EXPERIMENT MANAGER</p>
+        <p style="font-size:0.9rem;color:#eee;font-weight:600;">管理实验生命周期</p>
+        <p style="font-size:0.82rem;color:#aaa;line-height:1.5;">
+          创建 <span class="highlight mono">exp##x/</span> 目录结构<br>
+          追踪实验状态 (state.json)<br>
+          生成 summary + slides<br>
+          归档完成的实验
+        </p>
+        <div style="margin-top:auto;padding-top:0.5rem;border-top:1px solid #333;">
+          <p class="mono dim" style="font-size:0.72rem;">exp-manager agent + pipeline hooks</p>
         </div>
+      </div>
+    </div>
+
+    <div class="terminal-box diagram" style="margin-top:1rem;padding:0.8rem 1.2rem;font-size:0.82rem;line-height:1.8;">
+      <div class="mono" style="text-align:center;">
+        <span class="highlight">Main Context</span> <span class="dim">(clean, focused on current task)</span><br>
+        <span class="dim">&ensp;&ensp;├── spawn →</span> <span class="accent">Paper Agent</span> <span class="dim">→ writes docs/papers/*.md → returns 5-line summary</span><br>
+        <span class="dim">&ensp;&ensp;├── spawn →</span> <span class="accent">Monitor Agent</span> <span class="dim">→ runs in background → alerts only on anomaly</span><br>
+        <span class="dim">&ensp;&ensp;└── spawn →</span> <span class="accent">Exp Agent</span> <span class="dim">→ manages exp lifecycle → returns status update</span>
       </div>
     </div>
   </div>
-  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/skills</p>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);right:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;line-height:1.6;">
+    Source: code.claude.com/docs/en/sub-agents &ensp;|&ensp; AReaL 最佳实践: zhuanlan.zhihu.com/p/2003269671630165191
+  </p>
 </section>
 
-<!-- Slide 19: Research Skills Showcase -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>研究相关 Skills</h2>
-    <div class="terminal-box" style="margin-top: 1.5rem;">
-      <table class="terminal-table" style="width: 100%;">
-        <thead>
-          <tr>
-            <th>Skill</th>
-            <th>用途</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="accent mono">fars-system</td>
-            <td>FARS 全自主研究系统架构指南，理解多 agent 研究流水线</td>
-          </tr>
-          <tr>
-            <td class="accent mono">fars-reviewer</td>
-            <td>论文 review agent 逻辑，完整性审计流水线与预处理</td>
-          </tr>
-          <tr>
-            <td class="accent mono">agent-exp-orchestration</td>
-            <td>并行实验编排：job 冲突、限速、子进程隔离、重试</td>
-          </tr>
-          <tr>
-            <td class="accent mono">rope2sink</td>
-            <td>ICML 论文写作 — LaTeX 编辑与 attention sink 分析</td>
-          </tr>
-          <tr>
-            <td class="accent mono">weekly-progress</td>
-            <td>自动化周报生成，结构化实验进展与文件引用</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- Slide 20: Anthropic Internal — 9 Skill Categories -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>Anthropic 内部 Skills <span class="accent">九大分类</span></h2>
-    <p class="dim" style="font-size: 0.82rem; margin-bottom: 0.8rem;">Source: Thariq Shihipar (@trq212), Claude Code 团队工程师 — 内部几百个活跃 Skills 中提炼</p>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem;">
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">1. 库与 API 参考</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">正确用库/SDK + 踩坑点</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">2. 产品验证</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">Playwright/tmux 验证代码</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">3. 数据获取与分析</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">连接数据/监控体系</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">4. 业务流程自动化</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">standup / ticket / weekly</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">5. 代码脚手架</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">模板生成 + 自然语言需求</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">6. 代码质量与审查</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">adversarial-review / style</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">7. CI/CD 与部署</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">babysit-pr / deploy / rollback</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">8. 运维手册</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">现象 → 排查 → 结构化报告</div>
-      </div>
-      <div class="terminal-box" style="padding: 0.6rem 0.8rem;">
-        <div class="accent mono" style="font-size: 0.8rem; font-weight: 700;">9. 基础设施运维</div>
-        <div class="dim" style="font-size: 0.72rem; margin-top: 0.2rem;">维护操作 + 安全护栏</div>
-      </div>
-    </div>
-    <div style="display: flex; gap: 0.8rem; margin-top: 0.8rem; font-size: 0.78rem;">
-      <div class="terminal-box" style="padding: 0.5rem 0.8rem; flex: 1;">
-        <span class="highlight">description 写「何时触发」</span><span class="dim"> 而非「我是什么」</span>
-      </div>
-      <div class="terminal-box" style="padding: 0.5rem 0.8rem; flex: 1;">
-        <span class="highlight">踩坑点章节</span><span class="dim"> = Skill 中信息量最大的部分</span>
-      </div>
-      <div class="terminal-box" style="padding: 0.5rem 0.8rem; flex: 1;">
-        <span class="highlight">渐进式披露</span><span class="dim"> — 用子目录按需加载</span>
-      </div>
-    </div>
-  </div>
-  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: Thariq Shihipar, "Lessons from Building Claude Code: How We Use Skills" (2026-03-17)</p>
-</section>
-
-<!-- Slide 21: Sub-agent Introduction -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>Sub-agent — 独立上下文的专家</h2>
-    <ul class="bullet-list" style="margin-top: 1.5rem;">
-      <li>
-        <span class="highlight">独立 context window</span>
-        <span> + system prompt + tools</span>
-        <br>
-        <span class="dim" style="margin-left: 1.4rem; font-size: 0.88rem;">主 context 保持干净，重任务在一次性 context 里完成</span>
-      </li>
-      <li>
-        <span>内置类型:</span>
-        <div style="margin-top: 0.5rem; margin-left: 1.4rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
-            <span class="accent">Explore</span> <span class="dim">(Haiku, 快速)</span>
-          </span>
-          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
-            <span class="accent">Plan</span>
-          </span>
-          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
-            <span class="accent">General-purpose</span>
-          </span>
-          <span class="terminal-box" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">
-            <span class="accent">Custom</span>
-          </span>
-        </div>
-      </li>
-      <li>
-        <span class="dim">⚠ 不能 spawn 其他 subagent</span>
-        <span> — 防止无限嵌套与资源爆炸</span>
-      </li>
-    </ul>
-  </div>
-  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
-</section>
-
-<!-- Slide 22: Subagent Delegation Pattern -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>Subagent Delegation Pattern</h2>
-    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.88rem; line-height: 1.9;">
-      <div class="mono">
-<span class="highlight">Main Context</span> <span class="dim">(clean)</span>            <span class="accent">Subagent Context</span> <span class="dim">(disposable)</span>
-<span class="dim">────────────────────              ─────────────────────────────</span>
-User request                      读取 skill.md (~60KB)
-  <span class="dim">|</span>                               读取实验数据
-收集需求 <span class="dim">(~10 lines)</span>            生成 HTML <span class="dim">(~3000 lines)</span>
-  <span class="dim">|</span>                               写入文件
-Spawn Agent tool <span class="accent">──────────────></span>
-  <span class="dim">|</span>                  <span class="accent"><──────────</span>  返回 summary <span class="dim">(5 lines)</span>
-向用户报告文件路径
-      </div>
-    </div>
-    <div class="big-quote" style="font-size: 1.05rem;">
-      "重活在一次性 context 里做，结果在干净 context 里收"
-    </div>
-  </div>
-  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/sub-agents</p>
-</section>
-
-<!-- Slide 23: Sub-agent Research Applications -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>Sub-agent 研究场景</h2>
-    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 1.5rem;">
-      <div class="terminal-box">
-        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">并行执行</div>
-        <div class="mono dim" style="font-size: 0.85rem;">
-          Agent 1: 读论文 → 提取方法论<br>
-          Agent 2: 搜索已有实现 → 评估可用性<br>
-          Agent 3: 查数据集可用性 → 下载方案
-        </div>
-      </div>
-      <div class="terminal-box">
-        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">分角色审查</div>
-        <div class="mono dim" style="font-size: 0.85rem;">
-          事实审查员: 数据与引用准确性<br>
-          安全专家:   代码安全 + 数据隐私<br>
-          资深工程师: 可复现性 + 性能
-        </div>
-      </div>
-      <div class="terminal-box">
-        <div class="accent" style="font-weight: 700; margin-bottom: 0.5rem;">Writer / Reviewer 模式</div>
-        <div class="mono dim" style="font-size: 0.85rem;">
-          Agent A: 实现实验代码 + 生成 slides<br>
-          Agent B: 独立审计正确性 + 可复现性
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Slide 24: Loop -->
-<section class="slide">
+<!-- Slide: Loop -->
+<section class="slide" id="slide-loop">
   <div class="slide-content">
     <h2>Loop — 循环自主执行</h2>
-    <div class="terminal-box" style="margin: 1.5rem 0; text-align: center; padding: 1.2rem 2rem;">
-      <span class="mono" style="font-size: 1.3rem;">
+    <div class="terminal-box" style="margin:1.5rem 0;text-align:center;padding:1.2rem 2rem;">
+      <span class="mono" style="font-size:1.3rem;">
         <span class="dim">$</span>
         <span class="highlight"> /loop </span>
         <span class="accent">5m</span>
@@ -397,124 +640,433 @@ Spawn Agent tool <span class="accent">──────────────
       <li>
         <span class="accent">训练监控</span>
         <span class="dim"> — </span>
-        <span class="mono dim" style="font-size: 0.85rem;">/loop 5m check GPU utilization and training loss</span>
+        <span class="mono dim" style="font-size:0.85rem;">/loop 5m check GPU utilization and training loss</span>
       </li>
       <li>
         <span class="accent">实验轮询</span>
         <span class="dim"> — </span>
-        <span class="mono dim" style="font-size: 0.85rem;">/loop 10m check if experiment batch has completed</span>
+        <span class="mono dim" style="font-size:0.85rem;">/loop 10m check if experiment batch has completed</span>
       </li>
       <li>
         <span class="accent">CI 观察</span>
         <span class="dim"> — </span>
-        <span class="mono dim" style="font-size: 0.85rem;">/loop 3m check GitHub Actions status for latest push</span>
+        <span class="mono dim" style="font-size:0.85rem;">/loop 3m check GitHub Actions status for latest push</span>
       </li>
       <li>
         <span class="accent">资源监控</span>
         <span class="dim"> — </span>
-        <span class="mono dim" style="font-size: 0.85rem;">/loop 15m check disk space and memory usage on VPS</span>
+        <span class="mono dim" style="font-size:0.85rem;">/loop 15m check disk space and memory usage on VPS</span>
       </li>
     </ul>
   </div>
   <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: code.claude.com/docs/en/cli-reference (/loop)</p>
 </section>
 
-<!-- Slide 25: Full Pipeline -->
-<section class="slide">
+<!-- Slide: Superpowers Overview — Callback to Context -->
+<section class="slide" id="slide-superpowers-overview">
   <div class="slide-content">
-    <h2>完整工作流: Hooks + Skills + Subagents</h2>
-    <div class="terminal-box diagram" style="margin: 1.5rem 0; font-size: 0.8rem; line-height: 2;">
-      <div class="mono">
-<span class="highlight">Trigger Layer (Hooks)</span>       <span class="accent">State Layer</span>             <span class="highlight">Execution Layer (Skills)</span>
-<span class="dim">┌──────────────────┐         ┌───────────────────┐         ┌──────────────────┐</span>
-<span class="dim">│</span> Stop hook        <span class="dim">│─read──→│</span> current_stage     <span class="dim">│─trigger─→│</span> block + hint     <span class="dim">│</span>
-<span class="dim">│</span> (session end)    <span class="dim">│</span>        <span class="dim">│</span> compact_pending   <span class="dim">│</span>          <span class="dim">│</span> next /skill      <span class="dim">│</span>
-<span class="dim">├──────────────────┤         │</span> last_skill_upd    <span class="dim">│         ├──────────────────┤</span>
-<span class="dim">│</span> PreCompact       <span class="dim">│─flag──→│</span> last_commit       <span class="dim">│</span>          <span class="dim">│</span> user runs        <span class="dim">│</span>
-<span class="dim">├──────────────────┤         └───────────────────┘         │</span> /skill-name      <span class="dim">│</span>
-<span class="dim">│</span> PostToolUse      <span class="dim">│─after Skill──────────────────────────→│</span> advance stage    <span class="dim">│</span>
-<span class="dim">└──────────────────┘                                       └──────────────────┘</span>
-      </div>
-    </div>
-    <div class="mono" style="text-align: center; font-size: 0.9rem;">
-      <span class="accent">dev</span>
-      <span class="dim"> → </span>
-      <span class="highlight">skill-update</span>
-      <span class="dim"> → </span>
-      <span class="accent">experiment</span>
-      <span class="dim"> → </span>
-      <span class="highlight">monitoring</span>
-      <span class="dim"> → </span>
-      <span class="accent">analysis</span>
-      <span class="dim"> → </span>
-      <span class="highlight">commit</span>
-      <span class="dim"> → </span>
-      <span class="accent">dev</span>
-      <span class="dim"> (cycle)</span>
-    </div>
-  </div>
-</section>
+    <h2><span class="accent">Superpowers</span> — Context is All You Need, in Practice</h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      人不擅长列计划，Agent 不擅长自我约束 — Superpowers 用一套完整 workflow 同时解决 context 的输入、输出和管理。
+    </p>
 
-<!-- Slide 26: Before/After — Paper Reproduction -->
-<section class="slide">
-  <div class="slide-content">
-    <h2>Before / After: 论文复现</h2>
-    <div class="comparison-grid" style="margin-top: 1.5rem;">
-      <div class="comparison-col bad">
-        <div class="col-label">IDE 助手</div>
-        <ol class="bullet-list" style="list-style: decimal; padding-left: 1.2rem;">
-          <li>读论文</li>
-          <li>问 AI 解释</li>
-          <li>手动粘贴代码</li>
-          <li>运行 → 报错</li>
-          <li>问 AI 修复</li>
-          <li>重复 4-5 步</li>
-          <li>手动启动训练</li>
-          <li>手动监控进度</li>
-        </ol>
-        <div class="dim" style="margin-top: 0.8rem; font-size: 0.85rem;">8 步，全程手动介入，context 频繁丢失</div>
-      </div>
-      <div class="comparison-col good">
-        <div class="col-label">Claude Code Agent</div>
-        <div class="terminal-box" style="margin-bottom: 0.8rem; padding: 0.6rem 1rem; font-size: 0.82rem;">
-          <span class="accent mono" style="font-weight:700;">AReaL 案例</span><span class="dim"> — inclusionAI 分布式 RL 框架</span>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.5rem;">
+      <!-- Input -->
+      <div class="terminal-box" style="padding:1.3rem;border-left:3px solid #4a9;display:flex;flex-direction:column;gap:0.6rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span class="mono" style="color:#4a9;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;">INPUT</span>
         </div>
-        <ul class="bullet-list">
-          <li><span class="accent">32 天</span> · 178 session · <span class="highlight">72 万行净增</span></li>
-          <li><span class="accent">零手打代码</span> — 全程 vibe coding</li>
-          <li>Read <span class="highlight">25,000</span> 次 &gt;&gt; Edit <span class="highlight">14,000</span> 次</li>
-          <li>分层配置: CLAUDE.md + rules/ + agents/ + skills/</li>
-          <li><span class="accent">/pr-review</span> 动态专家团队按风险分级审查</li>
-        </ul>
-        <div class="highlight" style="margin-top: 0.8rem; font-size: 0.82rem;">Agent 核心价值 = 理解与导航，不是生成</div>
+        <p style="font-size:1rem;color:#eee;font-weight:600;">
+          Brainstorming 产生丰富 context
+        </p>
+        <p style="font-size:0.85rem;color:#aaa;line-height:1.6;">
+          不靠人写长 prompt<br>
+          而是 Agent <span class="highlight">逐个提问</span>来澄清需求<br>
+          自动生成完整的 spec 文档
+        </p>
+        <div style="margin-top:auto;padding-top:0.6rem;border-top:1px solid #333;">
+          <p class="mono" style="font-size:0.78rem;color:#4a9;">Brainstorming → Spec</p>
+        </div>
       </div>
+
+      <!-- Output -->
+      <div class="terminal-box" style="padding:1.3rem;border-left:3px solid #48a;display:flex;flex-direction:column;gap:0.6rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span class="mono" style="color:#48a;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;">OUTPUT</span>
+        </div>
+        <p style="font-size:1rem;color:#eee;font-weight:600;">
+          Sub-agent 驱动高效输出
+        </p>
+        <p style="font-size:0.85rem;color:#aaa;line-height:1.6;">
+          细化任务切分 + 制定计划<br>
+          交给 subagent <span class="highlight">并行执行</span><br>
+          双重 review 确保输出质量
+        </p>
+        <div style="margin-top:auto;padding-top:0.6rem;border-top:1px solid #333;">
+          <p class="mono" style="font-size:0.78rem;color:#48a;">Plan → Execute → Review</p>
+        </div>
+      </div>
+
+      <!-- Management -->
+      <div class="terminal-box" style="padding:1.3rem;border-left:3px solid #a84;display:flex;flex-direction:column;gap:0.6rem;">
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span class="mono" style="color:#a84;font-size:0.8rem;font-weight:700;letter-spacing:0.1em;">MANAGEMENT</span>
+        </div>
+        <p style="font-size:1rem;color:#eee;font-weight:600;">
+          所有 context 落盘为文档
+        </p>
+        <p style="font-size:0.85rem;color:#aaa;line-height:1.6;">
+          需求 → <span class="highlight">spec.md</span><br>
+          计划 → <span class="highlight">plan.md</span><br>
+          跨 session 完整保留，永不丢失
+        </p>
+        <div style="margin-top:auto;padding-top:0.6rem;border-top:1px solid #333;">
+          <p class="mono" style="font-size:0.78rem;color:#a84;">Spec + Plan + Git history</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:1rem;padding:0.8rem 1.2rem;text-align:center;">
+      <div class="mono" style="font-size:0.82rem;line-height:2;">
+        <span class="accent" style="font-weight:700;">Brainstorming</span>
+        <span class="dim"> → </span>
+        <span class="highlight" style="font-weight:700;">Spec</span>
+        <span class="dim"> → </span>
+        <span class="accent" style="font-weight:700;">Plan</span>
+        <span class="dim"> → </span>
+        <span class="highlight" style="font-weight:700;">Worktree</span>
+        <span class="dim"> → </span>
+        <span class="accent" style="font-weight:700;">TDD</span>
+        <span class="dim"> → </span>
+        <span class="highlight" style="font-weight:700;">Review</span>
+        <span class="dim"> → </span>
+        <span class="accent" style="font-weight:700;">Verify &amp; Merge</span>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: github.com/obra/superpowers</p>
+</section>
+
+<!-- Slide: Brainstorming → Spec → Plan -->
+<section class="slide" id="slide-superpowers-think">
+  <div class="slide-content">
+    <h2>Think: <span class="accent">Brainstorming</span> → Spec → Plan</h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      Prompt Engineering 的痛点：人往往说不清自己要什么。Superpowers 用结构化提问解决这个问题。
+    </p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.2rem;">
+      <!-- Brainstorming -->
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;border-color:rgba(0,255,102,0.4);">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">1. BRAINSTORMING</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem;">
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 探索项目上下文（文件、文档、commits）
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> <span class="highlight">逐个提问</span>，澄清需求和约束
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 提出 2-3 个方案 + 推荐理由
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 逐节呈现设计，逐节确认
+            </li>
+          </ul>
+        </div>
+        <div class="terminal-box" style="padding:0.8rem 1rem;">
+          <p class="mono dim" style="font-size:0.75rem;margin-bottom:0.3rem;">OUTPUT</p>
+          <p style="font-size:0.85rem;color:#ccc;">
+            <span class="highlight mono">docs/specs/YYYY-MM-DD-design.md</span><br>
+            <span class="dim">经 spec-reviewer 自动审查 + 用户确认</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Plan -->
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;border-color:rgba(0,255,102,0.4);">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">2. WRITING PLANS</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem;">
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 映射文件结构，识别依赖
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 拆分为<span class="highlight">独立任务</span>（每个 2-5 分钟）
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> plan-reviewer 自动审查一致性
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 每个任务可独立交给 subagent 执行
+            </li>
+          </ul>
+        </div>
+        <div class="terminal-box" style="padding:0.8rem 1rem;">
+          <p class="mono dim" style="font-size:0.75rem;margin-bottom:0.3rem;">OUTPUT</p>
+          <p style="font-size:0.85rem;color:#ccc;">
+            <span class="highlight mono">docs/plans/YYYY-MM-DD-plan.md</span><br>
+            <span class="dim">经 plan-reviewer 审查 + 用户确认</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-box" style="margin-top:1rem;padding:0.8rem 1.2rem;text-align:center;">
+      <span style="font-size:0.9rem;color:#eee;">
+        关键：所有思考过程<span class="accent">落盘为文档</span> — 不再只存在于对话历史中，跨 session 永不丢失
+      </span>
     </div>
   </div>
 </section>
 
-<!-- Slide 27: Before/After — Experiment Lifecycle -->
-<section class="slide">
+<!-- Slide: Execute → Review → Merge -->
+<section class="slide" id="slide-superpowers-build">
   <div class="slide-content">
-    <h2>Before / After: 实验生命周期</h2>
-    <div class="comparison-grid" style="margin-top: 1.5rem;">
-      <div class="comparison-col bad">
-        <div class="col-label">传统工作方式</div>
-        <ul class="bullet-list">
-          <li>手动追踪实验状态<br><span class="dim" style="font-size: 0.82rem;">表格/笔记，容易遗漏</span></li>
-          <li>Context 在 session 结束后丢失<br><span class="dim" style="font-size: 0.82rem;">下次要重新解释背景</span></li>
-          <li>无自动提醒下一步<br><span class="dim" style="font-size: 0.82rem;">靠记忆，易遗忘关键步骤</span></li>
-          <li>结果散落各处<br><span class="dim" style="font-size: 0.82rem;">slides / logs / notes 不同位置</span></li>
+    <h2>Build &amp; Verify: <span class="accent">Execute</span> → Review → Merge</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1.2rem;">
+      <!-- Execute -->
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">3. EXECUTE (Subagent-Driven)</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem;">
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 创建隔离 <span class="highlight">git worktree</span>
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 每个任务分发给独立 subagent
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 强制 <span class="highlight">TDD</span>: RED → GREEN → REFACTOR
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 每个任务完成后自动 commit
+            </li>
+          </ul>
+        </div>
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">4. REVIEW (双重审查)</p>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.4rem;">
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> <span class="highlight">Spec 合规性</span>审查：代码是否符合设计？
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> <span class="highlight">代码质量</span>审查：实现是否可维护？
+            </li>
+            <li style="font-size:0.85rem;color:#ccc;display:flex;gap:0.5rem;">
+              <span class="accent">▸</span> 两者都通过才进入下一步
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Verify & Merge -->
+      <div style="display:flex;flex-direction:column;gap:0.8rem;">
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">5. VERIFY (证据优先)</p>
+          <div class="terminal-box" style="padding:0.8rem;margin-bottom:0.6rem;font-size:0.82rem;background:rgba(0,255,102,0.03);">
+            <span class="mono dim">$ </span><span class="mono highlight">npm test</span><br>
+            <span class="mono" style="color:#4a9;">Tests: 42 passed, 0 failed</span><br>
+            <span class="mono dim">$ </span><span class="mono highlight">git diff --stat</span><br>
+            <span class="mono" style="color:#ccc;">12 files changed, 340(+), 28(-)</span>
+          </div>
+          <p style="font-size:0.85rem;color:#aaa;">
+            无实际运行证据 → <span style="color:#f87171;">不允许声称完成</span>
+          </p>
+        </div>
+        <div class="terminal-box" style="padding:1.2rem;">
+          <p class="accent mono" style="font-size:0.8rem;font-weight:700;margin-bottom:0.6rem;">6. FINISH (4 种路径)</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;">
+            <div class="terminal-box" style="padding:0.4rem 0.6rem;text-align:center;">
+              <span class="accent mono" style="font-size:0.8rem;">Merge</span>
+            </div>
+            <div class="terminal-box" style="padding:0.4rem 0.6rem;text-align:center;">
+              <span class="accent mono" style="font-size:0.8rem;">Push + PR</span>
+            </div>
+            <div class="terminal-box" style="padding:0.4rem 0.6rem;text-align:center;">
+              <span class="mono dim" style="font-size:0.8rem;">Keep branch</span>
+            </div>
+            <div class="terminal-box" style="padding:0.4rem 0.6rem;text-align:center;">
+              <span class="mono dim" style="font-size:0.8rem;">Discard</span>
+            </div>
+          </div>
+          <p class="dim" style="font-size:0.8rem;margin-top:0.5rem;">worktree 自动清理</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="mono dim" style="text-align:center;margin-top:0.8rem;font-size:0.82rem;">
+      整个流程<span class="highlight">完全通用</span> — 不限于编程，任何需要 spec → plan → execute 的任务都适用
+    </p>
+  </div>
+</section>
+
+<!-- Slide: Labmate — Context is All You Need, Fully Realized -->
+<section class="slide" id="slide-labmate-recall">
+  <div class="slide-content">
+    <h2><span class="accent">Labmate</span> — Context is All You Need, Fully Realized</h2>
+    <p class="dim" style="font-size:0.9rem;margin-top:-0.3rem;">
+      把前面所有实践融入一个 Claude Code plugin — 开箱即用的研究项目 harness
+    </p>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.2rem;">
+      <!-- Input -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #4a9;display:flex;flex-direction:column;gap:0.5rem;">
+        <span class="mono" style="color:#4a9;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;">INPUT</span>
+        <p style="font-size:0.92rem;color:#eee;font-weight:600;">专有 Agent 喂 Context</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.3rem;">
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">domain-expert</span> 读论文 → 写入 docs/papers/
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">project-advisor</span> 追踪实验历史
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">SessionStart</span> hook 自动注入项目 context
+          </li>
         </ul>
       </div>
-      <div class="comparison-col good">
-        <div class="col-label">Pipeline + Hooks 工作方式</div>
-        <ul class="bullet-list">
-          <li><span class="accent">Pipeline hooks</span> 自动追踪阶段<br><span class="dim" style="font-size: 0.82rem;">state.json 持久化，随时查询</span></li>
-          <li><span class="accent">Memory</span> 跨 session 保留知识<br><span class="dim" style="font-size: 0.82rem;">CLAUDE.md + skills 永不遗忘</span></li>
-          <li><span class="accent">Stop hook</span> 自动提醒下一步<br><span class="dim" style="font-size: 0.82rem;">确定性执行，不依赖记忆</span></li>
-          <li><span class="accent">自动生成</span> slides + changelog<br><span class="dim" style="font-size: 0.82rem;">实验结束即产出，统一归档</span></li>
+
+      <!-- Output -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #48a;display:flex;flex-direction:column;gap:0.5rem;">
+        <span class="mono" style="color:#48a;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;">OUTPUT</span>
+        <p style="font-size:0.92rem;color:#eee;font-weight:600;">Skill 驱动标准化输出</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.3rem;">
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">/new-experiment</span> 标准目录脚手架
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">/analyze-experiment</span> 分析 + slides
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">exp-manager</span> 后台监控 + 重试
+          </li>
+        </ul>
+      </div>
+
+      <!-- Management -->
+      <div class="terminal-box" style="padding:1.2rem;border-left:3px solid #a84;display:flex;flex-direction:column;gap:0.5rem;">
+        <span class="mono" style="color:#a84;font-size:0.78rem;font-weight:700;letter-spacing:0.1em;">MANAGEMENT</span>
+        <p style="font-size:0.92rem;color:#eee;font-weight:600;">知识进 repo，不留聊天</p>
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0.3rem;">
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">/update-project-skill</span> 压缩知识到 SKILL.md
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">PreCompact</span> hook 提醒保存状态
+          </li>
+          <li style="font-size:0.8rem;color:#aaa;display:flex;gap:0.4rem;">
+            <span class="accent">▸</span> <span class="highlight">.pipeline-state.json</span> 跨 session 持久
+          </li>
         </ul>
       </div>
     </div>
+
+    <div class="terminal-box" style="margin-top:1rem;padding:0.8rem 1.2rem;">
+      <div class="mono" style="font-size:0.82rem;line-height:2;text-align:center;">
+        <span class="dim">$</span> <span class="highlight">claude plugin install freemty/labmate</span>
+        <span class="dim">&ensp;&ensp;→&ensp;&ensp;</span>
+        <span class="accent">7 agents</span> + <span class="accent">7 skills</span> + <span class="accent">5 hooks</span> + <span class="accent">experiment infra</span>
+      </div>
+    </div>
   </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;">Source: github.com/freemty/labmate</p>
+</section>
+
+<!-- Slide: Labmate — Architecture & Workflow Demo -->
+<section class="slide" id="slide-labmate-demo">
+  <div class="slide-content">
+    <h2><span class="accent">Labmate</span> — 研究工作流 Demo</h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem;">
+      <!-- Left: Architecture -->
+      <div>
+        <p class="mono dim" style="font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.6rem;">ARCHITECTURE</p>
+        <div class="terminal-box" style="padding:1rem;font-size:0.78rem;line-height:1.7;">
+          <div class="mono">
+<span class="dim">your-project/</span>
+├── <span class="highlight">CLAUDE.md</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;# 路由入口 (&lt;80 行)</span>
+├── <span class="dim">.claude/</span>
+│&ensp;&ensp;├── <span class="accent">agents/</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;# 7 个 agent</span>
+│&ensp;&ensp;├── <span class="accent">skills/</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;# 7 个 skill</span>
+│&ensp;&ensp;└── <span class="accent">hooks/</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;# 5 个 hook</span>
+├── <span class="highlight">exp/</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;# 实验目录</span>
+│&ensp;&ensp;├── <span class="accent">exp01a/</span> <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;# {NN}{x} 命名</span>
+│&ensp;&ensp;│&ensp;&ensp;├── docs/ scripts/ summary.md
+│&ensp;&ensp;├── lib/ <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;# 共享分析工具</span>
+│&ensp;&ensp;└── <span class="highlight">summary.md</span> <span class="dim">&ensp;&ensp;# 跨实验记录</span>
+├── docs/papers/ <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;# 论文 + landscape</span>
+├── prompts/ <span class="dim">&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;# 版本化 prompt</span>
+└── <span class="highlight">.pipeline-state.json</span> <span class="dim"># 状态机</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Workflow -->
+      <div>
+        <p class="mono dim" style="font-size:0.75rem;letter-spacing:0.1em;margin-bottom:0.6rem;">COMPLETE CYCLE</p>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">1</span>
+            <div>
+              <span class="highlight mono" style="font-size:0.85rem;">/new-experiment</span>
+              <span class="dim" style="font-size:0.78rem;"> → 回答 4 个问题 → 生成 exp{NN}{x}/</span>
+            </div>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">2</span>
+            <div>
+              <span class="highlight mono" style="font-size:0.85rem;">run experiment</span>
+              <span class="dim" style="font-size:0.78rem;"> → exp-manager 后台监控 + tmux</span>
+            </div>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">3</span>
+            <div>
+              <span class="highlight mono" style="font-size:0.85rem;">/analyze-experiment</span>
+              <span class="dim" style="font-size:0.78rem;"> → 分析 → domain-expert → slides</span>
+            </div>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">4</span>
+            <div>
+              <span class="highlight mono" style="font-size:0.85rem;">/commit-changelog</span>
+              <span class="dim" style="font-size:0.78rem;"> → 标准化 commit + CHANGELOG</span>
+            </div>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">5</span>
+            <div>
+              <span class="highlight mono" style="font-size:0.85rem;">/update-project-skill</span>
+              <span class="dim" style="font-size:0.78rem;"> → Opus 扫描 → 压缩知识到 SKILL.md</span>
+            </div>
+          </div>
+          <div class="terminal-box" style="padding:0.6rem 1rem;display:flex;align-items:center;gap:0.8rem;border-color:rgba(0,255,102,0.3);">
+            <span class="mono accent" style="font-size:0.85rem;font-weight:700;min-width:1.5rem;">↩</span>
+            <div>
+              <span class="accent mono" style="font-size:0.85rem;">repeat</span>
+              <span class="dim" style="font-size:0.78rem;"> → hooks 自动提醒下一步</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:0.6rem;margin-top:0.8rem;font-size:0.75rem;">
+      <div class="terminal-box" style="padding:0.4rem 0.8rem;flex:1;text-align:center;">
+        <span class="dim">设计原则：</span><span class="highlight">agent 最小权限</span><span class="dim"> — 4/7 只读</span>
+      </div>
+      <div class="terminal-box" style="padding:0.4rem 0.8rem;flex:1;text-align:center;">
+        <span class="dim">hook</span> <span class="highlight">只提醒不拦截</span>
+      </div>
+      <div class="terminal-box" style="padding:0.4rem 0.8rem;flex:1;text-align:center;">
+        <span class="dim">所有知识</span><span class="highlight">进 repo</span><span class="dim"> 不留聊天</span>
+      </div>
+    </div>
+  </div>
+  <p class="mono dim" style="position:absolute;bottom:clamp(0.4rem,1vh,0.8rem);left:clamp(1rem,3vw,3rem);right:clamp(1rem,3vw,3rem);font-size:clamp(0.5rem,0.7vw,0.65rem);opacity:0.4;line-height:1.6;">
+    github.com/freemty/labmate &ensp;|&ensp; First user: PostTrainBench — 迭代 auto post-training 的 agent
+  </p>
 </section>
